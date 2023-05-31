@@ -6,7 +6,7 @@
 
     export let name;
 
-    let dbName = 'challenges';
+    let dbName = 'groomsmaid';
 
     let randomChallenge = { id: '', name: 'Loading...', completed: [] };
     let challengeList = [];
@@ -79,13 +79,12 @@
     <div class="heading">
         {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
-                <h2>Take a photo of...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
                 <h3>Completed by:</h3>
                 <h2 class={randomChallenge.completed.length > 0 ? 'completers' : ''}>
                     {randomChallenge.completed.length > 0
                         ? randomChallenge.completed.join(', ')
-                        : 'Not completed by anyone yet!'}
+                        : 'Not completed by any teams yet!'}
                 </h2>
             </div>
         {/if}

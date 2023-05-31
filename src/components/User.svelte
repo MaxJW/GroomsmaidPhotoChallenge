@@ -7,7 +7,7 @@
         nameVal = value;
     });
 
-    let newName = '';
+    let newName = 'Team ';
 
     function setName() {
         newName = newName.toLowerCase();
@@ -25,7 +25,7 @@
     <p id="logged-in">{nameVal} <span on:click={resetName}>Change</span></p>
 {:else}
     <div id="name-container">
-        <label for="name-input">What's your name?</label>
+        <label for="name-input">What's your team name?</label>
         <input id="name-input" bind:value={newName} type="text" />
         <button on:click={setName}>Let's go!</button>
     </div>
