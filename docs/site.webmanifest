@@ -1,10 +1,10 @@
 {
-	"name": "Photo Challenge",
-	"short_name": "Photo Challenge",
+	"name": "Groomsmaid Photo Challenge",
+	"short_name": "Groomsmaid Photo Challenge",
 	"theme_color": "#13131c",
 	"background_color": "#13131c",
 	"display": "fullscreen",
 	"orientation": "portrait",
-	"scope": "https://camera.maxandisla.love/",
-	"start_url": "https://camera.maxandisla.love/"
+	"scope": "https://groomsmaid.maxandisla.love/",
+	"start_url": "https://groomsmaid.maxandisla.love/"
 }
