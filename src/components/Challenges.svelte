@@ -79,6 +79,7 @@
     <div class="heading">
         {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
+                <h2>Take a photo...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
                 <h3>Completed by:</h3>
                 <h2 class={randomChallenge.completed.length > 0 ? 'completers' : ''}>
