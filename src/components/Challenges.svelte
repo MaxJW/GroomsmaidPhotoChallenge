@@ -3,6 +3,7 @@
     import { collection, doc, updateDoc, getDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
     import { toast } from '@zerodevx/svelte-toast';
     import Leaderboard from './Leaderboard.svelte';
+    import Total from './Total.svelte';
 
     export let name;
 
@@ -10,12 +11,14 @@
 
     let randomChallenge = { id: '', name: 'Loading...', completed: [] };
     let challengeList = [];
+    let completedChallenges = 0;
 
     let recentlySelected = []; // Array to keep track of recently selected challenges
     let recentThreshold = 6; // Number of previous selections to consider as "recent"
 
     const collRef = collection(db, dbName);
     const unsub = onSnapshot(collRef, (coll) => {
+        completedChallenges = 0;
         challengeList = [];
         coll.forEach((doc) => {
             challengeList.push({
@@ -29,6 +32,9 @@
                     name: doc.data().name,
                     completed: doc.data().completed,
                 };
+            }
+            if (doc.data().completed.includes(name)) {
+                completedChallenges += 1;
             }
         });
         if (!randomChallenge || randomChallenge.name == 'Loading...') {
@@ -54,52 +60,63 @@
     }
 
     async function completeChallenge() {
-        if (randomChallenge.completed.includes(name)) {
-            toast.push('🚧 Challenge already completed!');
-            return;
-        }
-        const challengedoc = doc(db, dbName, randomChallenge.id);
-        const docSnap = await getDoc(challengedoc);
+        if (confirm('Mark this challenge as completed?')) {
+            if (randomChallenge.completed.includes(name)) {
+                toast.push('🚧 Challenge already completed!');
+                return;
+            }
+            try {
+                const challengedoc = doc(db, dbName, randomChallenge.id);
+                const docSnap = await getDoc(challengedoc);
 
-        if (docSnap.exists()) {
-            await updateDoc(challengedoc, {
-                completed: arrayUnion(name),
-            }).then(() => {
-                toast.push('✅ Challenge completed!');
-            });
-        } else {
-            toast.push('🚨 Unable to complete challenge, try again or refresh!');
+                if (docSnap.exists()) {
+                    await updateDoc(challengedoc, {
+                        completed: arrayUnion(name),
+                    }).then(() => {
+                        toast.push('✅ Challenge completed!');
+                        selectRandomString();
+                    });
+                } else {
+                    toast.push('🚨 Unable to complete challenge, try again or refresh!');
+                }
+            } catch {
+                toast.push('🚨 Unable to complete challenge, try again or refresh!');
+            }
         }
     }
 </script>
 
+<Total total={challengeList.length} completed={completedChallenges} />
 <Leaderboard {challengeList} />
 
 <div class="container">
-    <div class="heading card-back">
+    <div class="heading card-back" class:green={randomChallenge.completed.includes(name)}>
         {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
-                <h2>Take a photo of...</h2>
+                <h2>Take a photo...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
-                <h3>Completed by:</h3>
-                <h2 class={randomChallenge.completed.length > 0 ? 'completers' : ''}>
+                <h2>Completed by:</h2>
+                <h3 class:completers={randomChallenge.completed.length > 0}>
                     {randomChallenge.completed.length > 0
                         ? randomChallenge.completed.join(', ')
                         : 'Not completed by anyone yet!'}
-                </h2>
+                </h3>
             </div>
         {/if}
         <div class="buttons">
-            <button on:click={selectRandomString}><span>🔃</span> New Challenge</button>
-            <button on:click={completeChallenge}><span>✅</span> Complete Challenge</button>
+            <button on:click={selectRandomString}><span>🔃</span></button>
+            <button on:click={completeChallenge}><span>✅</span></button>
         </div>
     </div>
-    <span>🥵</span>
 </div>
 
 <style>
     h1 {
         min-height: 56px;
+    }
+
+    .green {
+        background-color: rgb(191, 255, 191) !important;
     }
 
     .container {
@@ -114,6 +131,8 @@
         left: 0;
         right: 0;
         z-index: 1;
+        min-width: 80%;
+        max-width: 95%;
     }
 
     .heading {
@@ -123,6 +142,12 @@
 
     .completers {
         text-transform: capitalize;
+        max-height: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 3;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
     }
 
     .challenge-block {
@@ -133,11 +158,13 @@
         display: flex;
         flex-direction: row;
         max-width: 100%;
+        align-items: center;
+        justify-content: space-evenly;
     }
 
-    .buttons button {
-        max-width: 50% !important;
-        min-width: 50% !important;
-        width: 50% !important;
+    button {
+        border-radius: 50%;
+        aspect-ratio: 1 / 1;
+        min-width: 50px;
     }
 </style>

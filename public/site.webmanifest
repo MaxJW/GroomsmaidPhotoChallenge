@@ -1,10 +1,10 @@
 {
 	"name": "Halloween Photo Challenge",
 	"short_name": "Halloween Photo Challenge",
-	"theme_color": "#13131c",
-	"background_color": "#13131c",
+	"theme_color": "#D38C4E",
+	"background_color": "#D38C4E",
 	"display": "fullscreen",
 	"orientation": "portrait",
-	"scope": "https://halloween.maxandisla.love/",
-	"start_url": "https://halloween.maxandisla.love/"
+	"scope": "https://halloween.maxwilson.co.uk/",
+	"start_url": "https://halloween.maxwilson.co.uk/"
 }

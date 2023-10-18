@@ -26,11 +26,14 @@
 {:else}
     <div id="name-container">
         <div class="card-back">
-            <label for="name-input">What's your name?</label>
+            <label for="name-input"
+                >What's your team name? <span class="subtitle"><br />Make sure it's unique!</span
+                ></label
+            >
             <input
                 id="name-input"
                 bind:value={newName}
-                placeholder="Type your name here!"
+                placeholder="Type your team name here!"
                 type="text"
             />
             <button on:click={setName}>Let's go!</button>
@@ -66,11 +69,16 @@
         margin: 0 auto;
         margin-top: 10px;
         width: 500px;
-        max-width: 80vw;
+        max-width: 70vw;
         font-weight: bold;
     }
 
+    .subtitle {
+        font-size: 1.5rem;
+    }
+
     button {
+        border-radius: 24px;
         margin-top: 1rem;
     }
 
@@ -82,10 +90,10 @@
         margin-left: 45px;
         z-index: 99;
 
-        max-width: 40vw;
+        max-width: 50vw;
 
         font-weight: bold;
-        font-size: 1.5rem;
+        font-size: 1rem;
         text-transform: capitalize;
 
         margin: 20px;
