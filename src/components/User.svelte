@@ -7,7 +7,7 @@
         nameVal = value;
     });
 
-    let newName = 'Team ';
+    let newName = '';
 
     function setName() {
         newName = newName.toLowerCase();
@@ -22,12 +22,19 @@
 
 {#if nameVal != ''}
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <p id="logged-in">{nameVal} <span on:click={resetName}>Change</span></p>
+    <p id="logged-in" class="card-back">{nameVal} <span on:click={resetName}>Change</span></p>
 {:else}
     <div id="name-container">
-        <label for="name-input">What's your team name?</label>
-        <input id="name-input" bind:value={newName} type="text" />
-        <button on:click={setName}>Let's go!</button>
+        <div class="card-back">
+            <label for="name-input">What's your name?</label>
+            <input
+                id="name-input"
+                bind:value={newName}
+                placeholder="Type your name here!"
+                type="text"
+            />
+            <button on:click={setName}>Let's go!</button>
+        </div>
     </div>
 {/if}
 
@@ -45,8 +52,6 @@
         right: 0;
         z-index: 1;
         text-align: center;
-        padding-left: 30px;
-        padding-right: 30px;
     }
 
     #name-container label {
@@ -82,6 +87,9 @@
         font-weight: bold;
         font-size: 1.5rem;
         text-transform: capitalize;
+
+        margin: 20px;
+        padding: 20px;
     }
 
     #logged-in span {

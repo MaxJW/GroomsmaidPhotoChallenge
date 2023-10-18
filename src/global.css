@@ -2,7 +2,7 @@ body,
 html {
 	background-color: #ffffff;
 
-	font-family: 'Poiret One', serif;
+	font-family: 'Metal Mania', cursive;
 	font-style: normal;
 	font-variant: normal;
 	-webkit-font-smoothing: subpixel-antialiased;
@@ -11,13 +11,9 @@ html {
 
 html {
 	height: 100%;
-	box-sizing: border-box;
-	border: 30px solid;
-	border-image-source: url(/src/assets/border.png);
-	border-image-slice: 181 337 204 212;
-	border-image-width: 182px 337px 201px 209px;
-	border-image-outset: 0px 0px 0px 0px;
-	border-image-repeat: stretch repeat;
+	background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3)), url(/src/assets/back.png);
+	background-repeat: repeat;
+	background-size: 80%;
 }
 
 body {
@@ -96,4 +92,11 @@ button:not(:disabled):active {
 
 button:disabled {
 	box-shadow: rgba(60, 64, 67, 0.3) 0 1px 3px 0, rgba(60, 64, 67, 0.15) 0 4px 8px 3px;
+}
+
+.card-back {
+	background-color: #fffcf9;
+	margin: 20px;
+	padding: 20px;
+	border-radius: 25px;
 }

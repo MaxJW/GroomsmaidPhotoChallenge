@@ -6,7 +6,7 @@
 
     export let name;
 
-    let dbName = 'groomsmaid';
+    let dbName = 'halloween';
 
     let randomChallenge = { id: '', name: 'Loading...', completed: [] };
     let challengeList = [];
@@ -76,22 +76,25 @@
 <Leaderboard {challengeList} />
 
 <div class="container">
-    <div class="heading">
+    <div class="heading card-back">
         {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
-                <h2>Take a photo...</h2>
+                <h2>Take a photo of...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
                 <h3>Completed by:</h3>
                 <h2 class={randomChallenge.completed.length > 0 ? 'completers' : ''}>
                     {randomChallenge.completed.length > 0
                         ? randomChallenge.completed.join(', ')
-                        : 'Not completed by any teams yet!'}
+                        : 'Not completed by anyone yet!'}
                 </h2>
             </div>
         {/if}
-        <button on:click={selectRandomString}>🔃 New Challenge</button>
-        <button on:click={completeChallenge}>✅ Complete Challenge</button>
+        <div class="buttons">
+            <button on:click={selectRandomString}><span>🔃</span> New Challenge</button>
+            <button on:click={completeChallenge}><span>✅</span> Complete Challenge</button>
+        </div>
     </div>
+    <span>🥵</span>
 </div>
 
 <style>
@@ -111,8 +114,6 @@
         left: 0;
         right: 0;
         z-index: 1;
-        padding-left: 30px;
-        padding-right: 30px;
     }
 
     .heading {
@@ -126,5 +127,17 @@
 
     .challenge-block {
         margin-bottom: 2rem;
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: row;
+        max-width: 100%;
+    }
+
+    .buttons button {
+        max-width: 50% !important;
+        min-width: 50% !important;
+        width: 50% !important;
     }
 </style>

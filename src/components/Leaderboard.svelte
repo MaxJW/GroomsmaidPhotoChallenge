@@ -70,13 +70,13 @@
 
 <style>
     .icon {
-        width: 70px;
-        height: 70px;
+        width: 80px;
+        height: 80px;
         position: absolute;
         bottom: 0;
         right: 0;
         margin: 35px;
-        background-color: white;
+        background-color: #fffcf9;
         border-radius: 50%;
         display: flex;
         transition: box-shadow 0.25s ease-out;

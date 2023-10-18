@@ -1,10 +1,10 @@
 {
-	"name": "Groomsmaid Photo Challenge",
-	"short_name": "Groomsmaid Photo Challenge",
+	"name": "Halloween Photo Challenge",
+	"short_name": "Halloween Photo Challenge",
 	"theme_color": "#13131c",
 	"background_color": "#13131c",
 	"display": "fullscreen",
 	"orientation": "portrait",
-	"scope": "https://groomsmaid.maxandisla.love/",
-	"start_url": "https://groomsmaid.maxandisla.love/"
+	"scope": "https://halloween.maxandisla.love/",
+	"start_url": "https://halloween.maxandisla.love/"
 }
