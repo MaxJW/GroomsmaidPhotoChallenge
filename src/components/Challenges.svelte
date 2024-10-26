@@ -13,8 +13,55 @@
     let challengeList = [];
     let completedChallenges = 0;
 
-    let recentlySelected = []; // Array to keep track of recently selected challenges
-    let recentThreshold = 6; // Number of previous selections to consider as "recent"
+    let selectedFile = null;
+
+    async function sendDiscordNotification() {
+        const webhookURL =
+            'https://discord.com/api/webhooks/1299761910199091360/EOkwoBXqGSZDM1f5PgM1zXhxcyMrDFPAnerH9rIbbsAyK8jGqmkE1sUglH-iFjvBQiNt';
+        const message = {
+            content:
+                'Team ' +
+                name.charAt(0).toUpperCase() +
+                name.slice(1) +
+                ' has completed all challenges!',
+        };
+
+        try {
+            await fetch(webhookURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            });
+        } catch (error) {
+            console.error('Error sending Discord notification:', error);
+        }
+    }
+
+    async function sendPictureToDiscord() {
+        const webhookURL =
+            'https://discord.com/api/webhooks/1299761910199091360/EOkwoBXqGSZDM1f5PgM1zXhxcyMrDFPAnerH9rIbbsAyK8jGqmkE1sUglH-iFjvBQiNt';
+        const message = {
+            content:
+                'Team ' + name.charAt(0).toUpperCase() + name.slice(1) + ' has sent a picture!',
+        };
+
+        const formData = new FormData();
+        formData.append('payload_json', JSON.stringify(message));
+        if (selectedFile) {
+            formData.append('file', selectedFile);
+        }
+
+        try {
+            await fetch(webhookURL, {
+                method: 'POST',
+                body: formData,
+            });
+        } catch (error) {
+            console.error('Error sending picture to Discord:', error);
+        }
+    }
 
     const collRef = collection(db, dbName);
     const unsub = onSnapshot(collRef, (coll) => {
@@ -37,26 +84,28 @@
                 completedChallenges += 1;
             }
         });
+
         if (!randomChallenge || randomChallenge.name == 'Loading...') {
-            selectRandomString();
+            selectRandomChallenge();
         }
-        if (recentThreshold >= challengeList.length) {
-            recentThreshold = challengeList.length - 1;
+        if (completedChallenges === challengeList.length) {
+            sendDiscordNotification();
         }
     });
 
-    function selectRandomString() {
-        let oldChallenge = randomChallenge;
-        while (
-            randomChallenge.id == oldChallenge.id ||
-            recentlySelected.includes(randomChallenge.id)
-        ) {
-            randomChallenge = challengeList[Math.floor(Math.random() * challengeList.length)];
+    function selectRandomChallenge() {
+        const availableChallenges = challengeList.filter(
+            (challenge) =>
+                !challenge.completed.includes(name) && challenge.id !== randomChallenge.id,
+        );
+
+        if (availableChallenges.length === 0) {
+            console.warn('No uncompleted and unique challenges available.');
+            return;
         }
-        recentlySelected.push(randomChallenge.id);
-        if (recentlySelected.length > recentThreshold) {
-            recentlySelected.shift(); // Remove the oldest item from the array if it exceeds the threshold
-        }
+
+        const randomIndex = Math.floor(Math.random() * availableChallenges.length);
+        randomChallenge = availableChallenges[randomIndex];
     }
 
     async function completeChallenge() {
@@ -74,7 +123,7 @@
                         completed: arrayUnion(name),
                     }).then(() => {
                         toast.push('✅ Challenge completed!');
-                        selectRandomString();
+                        selectRandomChallenge();
                     });
                 } else {
                     toast.push('🚨 Unable to complete challenge, try again or refresh!');
@@ -84,6 +133,15 @@
             }
         }
     }
+
+    function handleFileChange(event) {
+        selectedFile = event.target.files[0];
+        sendPictureToDiscord();
+    }
+
+    function handleButtonClick() {
+        document.getElementById('fileInput').click();
+    }
 </script>
 
 <Total total={challengeList.length} completed={completedChallenges} />
@@ -91,7 +149,18 @@
 
 <div class="container">
     <div class="heading card-back" class:green={randomChallenge.completed.includes(name)}>
-        {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
+        {#if completedChallenges == challengeList.length}
+            <h1 class="no-margins">🎉 All challenges completed! 🎉</h1>
+            <h2>Submit your best picture from the game below:</h2>
+            <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                on:change={handleFileChange}
+                style="display: none;"
+            />
+            <button on:click={handleButtonClick}><span>📷</span></button>
+        {:else if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
                 <h2>Take a photo of...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
@@ -102,11 +171,11 @@
                         : 'Not completed by anyone yet!'}
                 </h3>
             </div>
+            <div class="buttons">
+                <button on:click={selectRandomChallenge}><span>🔃</span></button>
+                <button on:click={completeChallenge}><span>✅</span></button>
+            </div>
         {/if}
-        <div class="buttons">
-            <button on:click={selectRandomString}><span>🔃</span></button>
-            <button on:click={completeChallenge}><span>✅</span></button>
-        </div>
     </div>
 </div>
 
@@ -167,5 +236,10 @@
         border-radius: 50%;
         aspect-ratio: 1 / 1;
         min-width: 50px;
+    }
+
+    .no-margins {
+        margin-top: 24px;
+        margin-bottom: 24px;
     }
 </style>

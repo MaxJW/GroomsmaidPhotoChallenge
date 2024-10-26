@@ -1,10 +1,12 @@
 <script lang="ts">
     export let total: number;
     export let completed: number;
+
+    $: done = completed === total;
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<p id="complete-box" class="card-back">{completed}/{total}</p>
+<p id="complete-box" class="card-back" class:done>{completed}/{total}</p>
 
 <style>
     #complete-box {
@@ -23,5 +25,9 @@
 
         margin: 20px;
         padding: 20px;
+    }
+
+    .done {
+        background-color: rgb(191, 255, 191);
     }
 </style>
