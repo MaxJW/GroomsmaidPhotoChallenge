@@ -93,7 +93,7 @@
     <div class="heading card-back" class:green={randomChallenge.completed.includes(name)}>
         {#if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
-                <h2>Take a photo...</h2>
+                <h2>Take a photo of...</h2>
                 <h1 class="challenge">{randomChallenge.name}</h1>
                 <h2>Completed by:</h2>
                 <h3 class:completers={randomChallenge.completed.length > 0}>

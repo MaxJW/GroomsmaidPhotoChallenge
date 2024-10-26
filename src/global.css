@@ -2,11 +2,10 @@ body,
 html {
 	background-color: #ffffff;
 
-	font-family: 'Metal Mania', cursive;
+	font-family: 'Jolly Lodger', system-ui;
 	font-style: normal;
 	font-variant: normal;
 	-webkit-font-smoothing: subpixel-antialiased;
-	letter-spacing: 0.5px;
 	text-rendering: optimizeLegibility;
 }
 
