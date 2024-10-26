@@ -145,6 +145,7 @@
         max-height: 100px;
         overflow: hidden;
         text-overflow: ellipsis;
+        line-clamp: 3;
         -webkit-line-clamp: 3;
         display: -webkit-box;
         -webkit-box-orient: vertical;

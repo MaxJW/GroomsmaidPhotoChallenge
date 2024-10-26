@@ -49,6 +49,9 @@
         'Tarot cards',
         'Your team with part of someone else’s costume',
         'Something spooky',
+        'In a mirror',
+        'Telling a ghost story',
+        'Someone scared',
     ];
 </script>
 

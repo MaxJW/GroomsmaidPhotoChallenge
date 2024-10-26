@@ -39,6 +39,7 @@
             <button on:click={setName}>Let's go!</button>
         </div>
     </div>
+    <div class="card-back">(v2.0.0)</div>
 {/if}
 
 <style>
