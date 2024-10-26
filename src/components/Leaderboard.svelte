@@ -70,12 +70,12 @@
 
 <style>
     .icon {
-        width: 80px;
-        height: 80px;
+        width: 50px;
+        height: 50px;
         position: absolute;
         bottom: 0;
         right: 0;
-        margin: 35px;
+        margin: 20px;
         background-color: #fffcf9;
         border-radius: 50%;
         display: flex;
@@ -99,8 +99,8 @@
         display: block;
         position: absolute;
         right: 0;
-        bottom: 100px;
-        margin: 35px;
+        bottom: 60px;
+        margin: 20px;
         width: auto;
         height: 350px;
         overflow-y: scroll;
