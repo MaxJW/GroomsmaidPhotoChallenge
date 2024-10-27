@@ -13,56 +13,6 @@
     let challengeList = [];
     let completedChallenges = 0;
 
-    let selectedFile = null;
-
-    async function sendDiscordNotification() {
-        const webhookURL =
-            'https://discord.com/api/webhooks/1299761910199091360/EOkwoBXqGSZDM1f5PgM1zXhxcyMrDFPAnerH9rIbbsAyK8jGqmkE1sUglH-iFjvBQiNt';
-        const message = {
-            content:
-                'Team ' +
-                name.charAt(0).toUpperCase() +
-                name.slice(1) +
-                ' has completed all challenges!',
-        };
-
-        try {
-            await fetch(webhookURL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(message),
-            });
-        } catch (error) {
-            console.error('Error sending Discord notification:', error);
-        }
-    }
-
-    async function sendPictureToDiscord() {
-        const webhookURL =
-            'https://discord.com/api/webhooks/1299761910199091360/EOkwoBXqGSZDM1f5PgM1zXhxcyMrDFPAnerH9rIbbsAyK8jGqmkE1sUglH-iFjvBQiNt';
-        const message = {
-            content:
-                'Team ' + name.charAt(0).toUpperCase() + name.slice(1) + ' has sent a picture!',
-        };
-
-        const formData = new FormData();
-        formData.append('payload_json', JSON.stringify(message));
-        if (selectedFile) {
-            formData.append('file', selectedFile);
-        }
-
-        try {
-            await fetch(webhookURL, {
-                method: 'POST',
-                body: formData,
-            });
-        } catch (error) {
-            console.error('Error sending picture to Discord:', error);
-        }
-    }
-
     const collRef = collection(db, dbName);
     const unsub = onSnapshot(collRef, (coll) => {
         completedChallenges = 0;
@@ -87,9 +37,6 @@
 
         if (!randomChallenge || randomChallenge.name == 'Loading...') {
             selectRandomChallenge();
-        }
-        if (completedChallenges === challengeList.length) {
-            sendDiscordNotification();
         }
     });
 
@@ -133,15 +80,6 @@
             }
         }
     }
-
-    function handleFileChange(event) {
-        selectedFile = event.target.files[0];
-        sendPictureToDiscord();
-    }
-
-    function handleButtonClick() {
-        document.getElementById('fileInput').click();
-    }
 </script>
 
 <Total total={challengeList.length} completed={completedChallenges} />
@@ -152,14 +90,6 @@
         {#if completedChallenges == challengeList.length}
             <h1 class="no-margins">🎉 All challenges completed! 🎉</h1>
             <h2>Submit your best picture from the game below:</h2>
-            <input
-                type="file"
-                id="fileInput"
-                accept="image/*"
-                on:change={handleFileChange}
-                style="display: none;"
-            />
-            <button on:click={handleButtonClick}><span>📷</span></button>
         {:else if randomChallenge && randomChallenge.name && randomChallenge.completed}
             <div class="challenge-block">
                 <h2>Take a photo of...</h2>
