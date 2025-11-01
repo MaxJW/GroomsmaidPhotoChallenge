@@ -94,7 +94,7 @@
 
     .progress-label {
         font-weight: 500;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         color: var(--text-dark);
         opacity: 0.8;
         text-transform: uppercase;
@@ -140,20 +140,20 @@
     }
 
     .completed-number {
-        font-size: 1.5rem;
+        font-size: 1.7rem;
         color: var(--orange-primary);
         line-height: 1;
     }
 
     .divider {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         color: var(--dark-purple);
         opacity: 0.5;
         line-height: 1;
     }
 
     .total-number {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         color: var(--dark-purple);
         opacity: 0.7;
         line-height: 1;

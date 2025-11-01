@@ -283,7 +283,7 @@
 
     .prompt {
         font-weight: 400;
-        font-size: 1.4rem;
+        font-size: 1.6rem;
         color: var(--dark-purple);
         margin-bottom: 16px;
         opacity: 0.9;
@@ -323,7 +323,7 @@
 
     .completers-label {
         font-weight: 500;
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         color: var(--text-dark);
         margin-bottom: 8px;
     }
@@ -347,6 +347,7 @@
     .completer-list {
         text-transform: capitalize;
         font-weight: 500;
+        font-size: 1.05rem;
         color: var(--text-dark);
         text-align: center;
         line-height: 1.5;
@@ -428,7 +429,7 @@
         }
 
         .prompt {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             margin-bottom: 12px;
         }
 
@@ -452,7 +453,7 @@
         }
 
         .completer-list {
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         .completion-celebration {

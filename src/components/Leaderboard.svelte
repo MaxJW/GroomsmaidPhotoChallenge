@@ -67,9 +67,9 @@
         class="leaderboard-container"
         transition:fly={{ y: 20, duration: 300, easing: quintOut }}
     >
-        <div class="leaderboard-header">
+            <div class="leaderboard-header">
             <div class="header-content">
-                <Trophy size={28} color="var(--orange-primary)" />
+                <Trophy size={28} color="var(--dark-purple)" />
                 <h2>Leaderboard</h2>
             </div>
             <button class="close-btn" on:click={toggleVisibility} title="Close">
@@ -202,7 +202,9 @@
         justify-content: space-between;
         padding: 20px;
         border-bottom: 2px solid var(--orange-light);
-        background: linear-gradient(135deg, var(--orange-light), var(--orange-primary));
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 249, 0.98));
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(74, 74, 122, 0.1);
     }
 
     .header-content {
@@ -213,9 +215,14 @@
 
     .header-content h2 {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.7rem;
         font-weight: 600;
         color: var(--dark-purple);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    .header-content :global(svg) {
+        filter: drop-shadow(0 1px 2px rgba(74, 74, 122, 0.3));
     }
 
     .close-btn {
@@ -224,8 +231,8 @@
         min-width: 36px;
         padding: 0;
         margin: 0;
-        background: rgba(255, 255, 255, 0.3);
-        border: none;
+        background: rgba(74, 74, 122, 0.1);
+        border: 1px solid rgba(74, 74, 122, 0.2);
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -235,7 +242,8 @@
     }
 
     .close-btn:hover {
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(74, 74, 122, 0.2);
+        border-color: var(--dark-purple);
         transform: rotate(90deg);
     }
 
@@ -322,7 +330,7 @@
     .player-name {
         text-transform: capitalize;
         font-weight: 500;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         color: var(--text-dark);
         display: block;
         overflow: hidden;
@@ -332,7 +340,7 @@
 
     .top-three .player-name {
         font-weight: 600;
-        font-size: 1.15rem;
+        font-size: 1.25rem;
     }
 
     .score {
@@ -345,17 +353,17 @@
 
     .score-value {
         font-weight: 700;
-        font-size: 1.3rem;
+        font-size: 1.5rem;
         color: var(--orange-primary);
     }
 
     .top-three .score-value {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
         color: var(--orange-dark);
     }
 
     .score-label {
-        font-size: 0.7rem;
+        font-size: 0.8rem;
         color: var(--dark-purple);
         opacity: 0.7;
         text-transform: uppercase;
@@ -371,11 +379,11 @@
     .empty-state p {
         margin: 8px 0;
         font-weight: 500;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .empty-state .subtext {
-        font-size: 0.9rem;
+        font-size: 1rem;
         opacity: 0.7;
         font-weight: 400;
         font-style: italic;

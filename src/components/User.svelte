@@ -104,7 +104,7 @@
     }
 
     #name-container label {
-        font-size: 2rem;
+        font-size: 2.2rem;
         font-weight: 500;
         margin: 16px 0;
         cursor: default;
@@ -115,7 +115,7 @@
 
     .subtitle {
         display: block;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: 400;
         color: var(--dark-purple);
         opacity: 0.8;
@@ -161,7 +161,7 @@
 
     .username {
         font-weight: 500;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         text-transform: capitalize;
         color: var(--text-dark);
         overflow: hidden;
