@@ -1,19 +1,29 @@
 <script lang="ts">
     import { onDestroy } from 'svelte';
+    import { fade } from 'svelte/transition';
     import { db } from '../firebase.js';
     import { collection, doc, updateDoc, getDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
     import confetti from 'canvas-confetti';
     import Leaderboard from './Leaderboard.svelte';
     import Total from './Total.svelte';
-    import { RefreshCw, CheckCircle2, AlertCircle, PartyPopper, Construction, Trophy } from 'lucide-svelte';
+    import { RefreshCw, Camera, X, Check, PartyPopper, Loader2 } from 'lucide-svelte';
+    import { uploadImage } from '../cloudinary';
+    import { toast } from '@zerodevx/svelte-toast';
 
     export let name;
 
     let dbName = 'halloween';
 
-    let randomChallenge = { id: '', name: 'Loading...', completed: [] };
+    let randomChallenge = { id: '', name: 'Loading...', completed: [], images: [] };
     let challengeList = [];
     let completedChallenges = 0;
+
+    // Image picker and preview state
+    let showPreview = false;
+    let capturedImage: string | null = null;
+    let imageFile: File | null = null;
+    let fileInput: HTMLInputElement;
+    let isUploading = false;
 
     const collRef = collection(db, dbName);
     const unsub = onSnapshot(collRef,
@@ -27,11 +37,15 @@
                     id: doc.id,
                     name: data.name || 'Unnamed Challenge',
                     completed: completed,
+                    images: Array.isArray(data.images) ? data.images : [],
                 };
                 challengeList.push(challengeData);
 
                 if (randomChallenge && randomChallenge.id && randomChallenge.id == doc.id) {
-                    randomChallenge = challengeData;
+                    randomChallenge = {
+                        ...challengeData,
+                        images: challengeData.images || [],
+                    };
                 }
 
                 if (completed.includes(name)) {
@@ -111,60 +125,154 @@
         });
     }
 
-    async function completeChallenge() {
-        if (confirm('Mark this challenge as completed?')) {
-            if (!randomChallenge || !randomChallenge.id) {
-                alert('No challenge selected!');
+    function openImagePicker() {
+        if (!randomChallenge || !randomChallenge.id) {
+            alert('No challenge selected!');
+            return;
+        }
+
+        // Check if already completed
+        if (randomChallenge.completed.includes(name)) {
+            alert('Challenge already completed!');
+            return;
+        }
+
+        // Trigger the file input
+        if (fileInput) {
+            fileInput.click();
+        }
+    }
+
+    function handleFileSelect(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const file = target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            return;
+        }
+
+        imageFile = file;
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            capturedImage = e.target?.result as string;
+            showPreview = true;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function cancelPreview() {
+        showPreview = false;
+        capturedImage = null;
+        imageFile = null;
+        isUploading = false;
+        // Reset file input so user can select the same file again if needed
+        if (fileInput) {
+            fileInput.value = '';
+        }
+    }
+
+    async function confirmAndUpload() {
+        if (!randomChallenge || !randomChallenge.id) {
+            alert('No challenge selected!');
+            return;
+        }
+
+        // Check locally first to prevent unnecessary API calls
+        if (randomChallenge.completed.includes(name)) {
+            alert('Challenge already completed!');
+            cancelPreview();
+            return;
+        }
+
+        // Prevent multiple simultaneous uploads
+        if (isUploading) {
+            return;
+        }
+
+        isUploading = true;
+
+        try {
+            const challengedoc = doc(db, dbName, randomChallenge.id);
+            const docSnap = await getDoc(challengedoc);
+
+            if (!docSnap.exists()) {
+                alert('Challenge not found in database. Please refresh and try again!');
+                isUploading = false;
+                cancelPreview();
                 return;
             }
 
-            // Check locally first to prevent unnecessary API calls
-            if (randomChallenge.completed.includes(name)) {
-                alert('Challenge already completed!');
+            // Double-check the document hasn't been updated since we last checked
+            const currentCompleted = docSnap.data().completed || [];
+            if (currentCompleted.includes(name)) {
+                alert('Challenge already completed by you!');
+                isUploading = false;
+                cancelPreview();
                 return;
             }
 
-            try {
-                const challengedoc = doc(db, dbName, randomChallenge.id);
-                const docSnap = await getDoc(challengedoc);
+            let imageUrl: string | null = null;
 
-                if (!docSnap.exists()) {
-                    alert('Challenge not found in database. Please refresh and try again!');
-                    return;
-                }
-
-                // Double-check the document hasn't been updated since we last checked
-                const currentCompleted = docSnap.data().completed || [];
-                if (currentCompleted.includes(name)) {
-                    alert('Challenge already completed by you!');
-                    // Update local state to reflect reality
-                    randomChallenge = {
-                        id: randomChallenge.id,
-                        name: randomChallenge.name,
-                        completed: currentCompleted,
-                    };
-                    return;
-                }
-
-                // Use arrayUnion which is atomic - prevents duplicates even with race conditions
-                await updateDoc(challengedoc, {
-                    completed: arrayUnion(name),
-                });
-
-                // Trigger confetti animation
-                triggerConfetti();
-                selectRandomChallenge();
-            } catch (error) {
-                console.error('Error completing challenge:', error);
-                // Provide more specific error messages
-                if (error.code === 'permission-denied') {
-                    alert('Permission denied. Please check your access!');
-                } else if (error.code === 'unavailable' || error.message?.includes('network')) {
-                    alert('Network error. Please check your connection and try again!');
-                } else {
-                    alert('Unable to complete challenge. Please try again or refresh!');
+            // Upload image if available
+            if (imageFile) {
+                try {
+                    imageUrl = await uploadImage(imageFile, randomChallenge.id, name);
+                } catch (uploadError) {
+                    console.error('Image upload failed:', uploadError);
+                    toast.push('Failed to upload image', {
+                        theme: {
+                            '--toastBackground': 'linear-gradient(135deg, #ff6b6b, #ff5252)',
+                            '--toastColor': 'white',
+                        },
+                        classes: ['error-toast'],
+                    });
+                    // Continue anyway - mark as complete even if upload fails
                 }
             }
+
+            // Prepare update data
+            const updateData: any = {
+                completed: arrayUnion(name),
+            };
+
+            // Add image to images array if upload succeeded
+            if (imageUrl) {
+                const imageData = {
+                    url: imageUrl,
+                    teamName: name,
+                    timestamp: Date.now(),
+                };
+                updateData.images = arrayUnion(imageData);
+            }
+
+            // Use arrayUnion which is atomic - prevents duplicates even with race conditions
+            await updateDoc(challengedoc, updateData);
+
+            // Trigger confetti animation
+            triggerConfetti();
+            selectRandomChallenge();
+            isUploading = false;
+            cancelPreview();
+        } catch (error) {
+            console.error('Error completing challenge:', error);
+            isUploading = false;
+            // Provide more specific error messages
+            if (error.code === 'permission-denied') {
+                alert('Permission denied. Please check your access!');
+            } else if (error.code === 'unavailable' || error.message?.includes('network')) {
+                alert('Network error. Please check your connection and try again!');
+            } else {
+                alert('Unable to complete challenge. Please try again or refresh!');
+            }
+            cancelPreview();
         }
     }
 </script>
@@ -203,13 +311,60 @@
                 <button class="action-btn refresh-btn" on:click={selectRandomChallenge} title="New Challenge">
                     <RefreshCw size={24} />
                 </button>
-                <button class="action-btn complete-btn" on:click={completeChallenge} title="Complete Challenge">
-                    <CheckCircle2 size={24} />
+                <button class="action-btn camera-btn" on:click={openImagePicker} title="Take Photo">
+                    <Camera size={24} />
                 </button>
+                <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    bind:this={fileInput}
+                    on:change={handleFileSelect}
+                    style="display: none;"
+                />
             </div>
         {/if}
     </div>
 </div>
+
+<!-- Image Preview Modal -->
+{#if showPreview && capturedImage}
+    <div class="preview-overlay" transition:fade={{ duration: 200 }}>
+        <div class="preview-container">
+            <div class="preview-header">
+                {#if isUploading}
+                    <h3>Uploading your photo...</h3>
+                {:else}
+                    <h3>Do you want to use this picture for this challenge?</h3>
+                {/if}
+            </div>
+
+            <div class="preview-wrapper">
+                {#if isUploading}
+                    <div class="loading-overlay">
+                        <Loader2 size={48} class="loading-spinner" />
+                        <p>Uploading and saving your challenge...</p>
+                    </div>
+                    <img src={capturedImage} alt="Selected photo" class="preview-image" class:loading-blur={isUploading} />
+                {:else}
+                    <img src={capturedImage} alt="Selected photo" class="preview-image" />
+                {/if}
+                <div class="preview-actions">
+                    <button class="action-btn confirm-btn" on:click={confirmAndUpload} disabled={isUploading} title="Confirm">
+                        {#if isUploading}
+                            <Loader2 size={24} class="spinner" />
+                        {:else}
+                            <Check size={24} />
+                        {/if}
+                    </button>
+                    <button class="action-btn cancel-btn" on:click={cancelPreview} disabled={isUploading} title="Cancel">
+                        <X size={24} />
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
 
 <style>
     .container {
@@ -396,14 +551,158 @@
         transform: translateY(-2px) rotate(180deg);
     }
 
-    .complete-btn {
+    .camera-btn {
         background: linear-gradient(135deg, var(--green-success), #90D490);
         color: var(--dark-purple);
         border-color: #90D490;
     }
 
-    .complete-btn:hover {
+    .camera-btn:hover {
         background: linear-gradient(135deg, #90D490, var(--green-success));
+    }
+
+    .preview-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .preview-container {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 249, 0.98));
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 24px;
+        max-width: 90%;
+        max-height: 90vh;
+        width: 100%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 12px 32px rgba(74, 74, 122, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .preview-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .preview-header h3 {
+        color: var(--dark-purple);
+        font-size: 1.4rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+
+
+    .preview-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .preview-image {
+        width: 100%;
+        border-radius: 16px;
+        object-fit: contain;
+        max-height: 60vh;
+        background: #000;
+        transition: filter 0.3s ease;
+    }
+
+    .preview-image.loading-blur {
+        filter: blur(4px);
+        opacity: 0.6;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+        border-radius: 16px;
+        z-index: 10;
+        gap: 16px;
+    }
+
+    .loading-overlay p {
+        color: var(--dark-purple);
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
+        text-align: center;
+    }
+
+    .loading-spinner {
+        color: var(--green-success);
+        animation: spin 1s linear infinite;
+    }
+
+    .spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .preview-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+    }
+
+    .confirm-btn {
+        background: linear-gradient(135deg, var(--green-success), #90D490);
+        color: var(--dark-purple);
+        border-color: #90D490;
+    }
+
+    .confirm-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #90D490, var(--green-success));
+    }
+
+    .confirm-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .cancel-btn {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: var(--white);
+        border-color: #ff5252;
+    }
+
+    .cancel-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #ff5252, #ff6b6b);
+    }
+
+    .cancel-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .action-btn :global(svg) {
