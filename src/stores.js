@@ -6,4 +6,4 @@ const tutorialDone = false;
 
 //Export all initial values to cookies (using localStore.js)
 export const name = localStore('pc-name', nameVal);
-export const tutorial = localStore('pc-tutorial', nameVal);
+export const tutorial = localStore('pc-tutorial', tutorialDone);

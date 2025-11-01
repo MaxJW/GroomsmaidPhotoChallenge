@@ -1,14 +1,13 @@
 <script lang="ts">
     import Challenges from './components/Challenges.svelte';
-    import { SvelteToast } from '@zerodevx/svelte-toast';
     import User from './components/User.svelte';
 
     //Currently set name
     let nameVal = '';
 
     //Populate firestore
-    import { db } from './firebase.js';
-    import { collection, addDoc } from 'firebase/firestore';
+    // Note: Challenges should be populated manually in Firestore console
+    // import { db } from './firebase.js';
     const halloweenList = [
         'The person with the best costume',
         'Your team with the person with the best costume',
@@ -59,8 +58,3 @@
 {#if nameVal != ''}
     <Challenges name={nameVal} />
 {/if}
-
-<SvelteToast />
-
-<style>
-</style>
