@@ -1,6 +1,6 @@
 <script lang="ts">
     import { name } from '../stores.js';
-    import { Ghost, Users } from 'lucide-svelte';
+    import { Snowflake, Users } from 'lucide-svelte';
 
     //Currently set name
     export let nameVal;
@@ -33,7 +33,7 @@
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div id="logged-in" class="card-back">
         <div class="user-info">
-            <Users size={20} color="var(--dark-purple)" />
+            <Users size={20} color="var(--christmas-green-dark)" />
             <span class="username">{nameVal}</span>
         </div>
         <button class="change-btn" on:click={resetName}>Change</button>
@@ -42,7 +42,7 @@
     <div id="name-container">
         <div class="card-back">
             <div class="icon-wrapper">
-                <Ghost size={48} color="var(--orange-primary)" />
+                <Snowflake size={48} color="var(--christmas-red)" />
             </div>
             <label for="name-input">
                 What's your team name?
@@ -117,7 +117,7 @@
         display: block;
         font-size: 1.2rem;
         font-weight: 400;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.8;
         margin-top: 8px;
         font-style: italic;
@@ -175,13 +175,13 @@
         padding: 8px 16px;
         font-size: 0.9rem;
         min-width: auto;
-        background: linear-gradient(135deg, var(--purple-light), var(--dark-purple));
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
         color: var(--white);
         border: none;
     }
 
     .change-btn:hover {
-        background: linear-gradient(135deg, var(--dark-purple), var(--purple-light));
+        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-dark));
     }
 
     @media (max-width: 480px) {

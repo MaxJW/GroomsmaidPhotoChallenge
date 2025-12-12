@@ -6,7 +6,7 @@
 
     export let name;
 
-    let dbName = 'halloween';
+    let dbName = 'christmas';
     let challenges: Array<{
         id: string;
         name: string;
@@ -45,7 +45,7 @@
 <div class="gallery-container">
     <div class="gallery-header card-back">
         <div class="header-content">
-            <Image size={32} color="var(--dark-purple)" />
+            <Image size={32} color="var(--christmas-green-dark)" />
             <h1>Photo Gallery</h1>
         </div>
         <p class="subtitle">All submitted photos grouped by challenge</p>
@@ -105,11 +105,11 @@
 
     .header-content h1 {
         margin: 0;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
     }
 
     .subtitle {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.8;
         font-size: 1.1rem;
         margin: 0;
@@ -131,7 +131,7 @@
 
     .empty-state p {
         font-size: 1.4rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         margin: 12px 0;
     }
 
@@ -147,12 +147,12 @@
 
     .challenge-title {
         font-size: 1.6rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         margin: 0 0 20px 0;
         font-weight: 600;
         text-align: center;
         padding-bottom: 12px;
-        border-bottom: 2px solid var(--orange-light);
+        border-bottom: 2px solid var(--christmas-green-light);
     }
 
     .images-grid {

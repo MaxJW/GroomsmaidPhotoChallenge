@@ -12,7 +12,7 @@
 
     export let name;
 
-    let dbName = 'halloween';
+    let dbName = 'christmas';
 
     let randomChallenge = { id: '', name: 'Loading...', completed: [], images: [] };
     let challengeList = [];
@@ -285,7 +285,7 @@
         {#if completedChallenges == challengeList.length}
             <div class="completion-celebration">
                 <div class="icon-large">
-                    <PartyPopper size={64} color="var(--orange-primary)" />
+                    <PartyPopper size={64} color="var(--christmas-red)" />
                 </div>
                 <h1>All challenges completed!</h1>
                 <h2>Submit your best picture from the game below</h2>
@@ -419,14 +419,14 @@
     }
 
     .completion-celebration h1 {
-        color: var(--orange-dark);
+        color: var(--christmas-red-dark);
         font-size: 2.2rem;
         margin: 0;
         font-weight: 600;
     }
 
     .completion-celebration h2 {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         font-weight: 400;
         font-size: 1.3rem;
         margin: 0;
@@ -439,7 +439,7 @@
     .prompt {
         font-weight: 400;
         font-size: 1.6rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         margin-bottom: 16px;
         opacity: 0.9;
     }
@@ -463,7 +463,7 @@
     .challenge {
         font-weight: 700;
         font-size: 1.8rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         margin: 0;
         line-height: 1.4;
         text-align: center;
@@ -491,12 +491,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--orange-light);
+        border: 1px solid var(--christmas-green-light);
     }
 
     .completers.has-completers {
         background: rgba(184, 230, 184, 0.3);
-        border-color: var(--green-success);
+        border-color: var(--christmas-green);
     }
 
     .completer-list {
@@ -512,7 +512,7 @@
     }
 
     .no-completers {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.7;
         font-style: italic;
         font-weight: 400;
@@ -538,27 +538,27 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid var(--orange-dark);
+        border: 2px solid var(--christmas-red-dark);
     }
 
     .refresh-btn {
-        background: linear-gradient(135deg, var(--purple-light), var(--dark-purple));
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
         color: var(--white);
     }
 
     .refresh-btn:hover {
-        background: linear-gradient(135deg, var(--dark-purple), var(--purple-light));
+        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-dark));
         transform: translateY(-2px) rotate(180deg);
     }
 
     .camera-btn {
-        background: linear-gradient(135deg, var(--green-success), #90D490);
-        color: var(--dark-purple);
-        border-color: #90D490;
+        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-light));
+        color: var(--white);
+        border-color: var(--christmas-green-light);
     }
 
     .camera-btn:hover {
-        background: linear-gradient(135deg, #90D490, var(--green-success));
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
     }
 
     .preview-overlay {
@@ -597,7 +597,7 @@
     }
 
     .preview-header h3 {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         font-size: 1.4rem;
         font-weight: 500;
         margin: 0;
@@ -644,7 +644,7 @@
     }
 
     .loading-overlay p {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         font-size: 1.1rem;
         font-weight: 500;
         margin: 0;
@@ -652,7 +652,7 @@
     }
 
     .loading-spinner {
-        color: var(--green-success);
+        color: var(--christmas-green);
         animation: spin 1s linear infinite;
     }
 
@@ -676,13 +676,13 @@
     }
 
     .confirm-btn {
-        background: linear-gradient(135deg, var(--green-success), #90D490);
-        color: var(--dark-purple);
-        border-color: #90D490;
+        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-light));
+        color: var(--white);
+        border-color: var(--christmas-green-light);
     }
 
     .confirm-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #90D490, var(--green-success));
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
     }
 
     .confirm-btn:disabled {

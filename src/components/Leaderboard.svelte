@@ -45,9 +45,9 @@
     }
 
     function getRankColor(rank: number) {
-        if (rank === 0) return 'var(--orange-primary)'; // Gold/Orange for first
-        if (rank === 1) return 'var(--purple-light)'; // Silver/Purple for second
-        if (rank === 2) return 'var(--orange-dark)'; // Bronze/Dark orange for third
+        if (rank === 0) return 'var(--christmas-red)'; // Red for first
+        if (rank === 1) return 'var(--christmas-green)'; // Green for second
+        if (rank === 2) return 'var(--christmas-brown)'; // Brown for third
         return 'var(--text-dark)'; // Default
     }
 </script>
@@ -69,7 +69,7 @@
     >
             <div class="leaderboard-header">
             <div class="header-content">
-                <Trophy size={28} color="var(--dark-purple)" />
+                <Trophy size={28} color="var(--christmas-green-dark)" />
                 <h2>Leaderboard</h2>
             </div>
             <button class="close-btn" on:click={toggleVisibility} title="Close">
@@ -97,11 +97,11 @@
                         >
                             <div class="rank" style="color: {getRankColor(index)}">
                                 {#if index === 0}
-                                    <Trophy size={24} color="var(--orange-primary)" />
+                                    <Trophy size={24} color="var(--christmas-red)" />
                                 {:else if index === 1}
-                                    <Trophy size={24} color="var(--purple-light)" />
+                                    <Trophy size={24} color="var(--christmas-green)" />
                                 {:else if index === 2}
-                                    <Trophy size={24} color="var(--orange-dark)" />
+                                    <Trophy size={24} color="var(--christmas-brown)" />
                                 {:else}
                                     <span class="rank-number">{index + 1}</span>
                                 {/if}
@@ -140,7 +140,7 @@
             0 2px 8px rgba(74, 74, 122, 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.9);
         cursor: pointer;
-        border: 3px solid var(--dark-purple);
+        border: 3px solid var(--christmas-green-dark);
     }
 
     .icon:hover {
@@ -148,12 +148,12 @@
         box-shadow: 0 8px 24px rgba(74, 74, 122, 0.5),
             0 4px 10px rgba(74, 74, 122, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 1);
-        border-color: var(--purple-light);
+        border-color: var(--christmas-green-light);
     }
 
     .icon.active {
-        background: linear-gradient(135deg, var(--purple-light), var(--dark-purple));
-        border-color: var(--dark-purple);
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
+        border-color: var(--christmas-green-dark);
         box-shadow: 0 6px 20px rgba(107, 107, 158, 0.5),
             0 2px 8px rgba(74, 74, 122, 0.4);
     }
@@ -163,7 +163,7 @@
     }
 
     .icon :global(svg) {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         filter: drop-shadow(0 1px 2px rgba(74, 74, 122, 0.3));
     }
 
@@ -201,7 +201,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 20px;
-        border-bottom: 2px solid var(--orange-light);
+        border-bottom: 2px solid var(--christmas-green-light);
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 249, 0.98));
         backdrop-filter: blur(10px);
         box-shadow: 0 2px 8px rgba(74, 74, 122, 0.1);
@@ -217,7 +217,7 @@
         margin: 0;
         font-size: 1.7rem;
         font-weight: 600;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     }
 
@@ -243,12 +243,12 @@
 
     .close-btn:hover {
         background: rgba(74, 74, 122, 0.2);
-        border-color: var(--dark-purple);
+        border-color: var(--christmas-green-dark);
         transform: rotate(90deg);
     }
 
     .close-btn :global(svg) {
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
     }
 
     .leaderboard-content {
@@ -268,12 +268,12 @@
     }
 
     .leaderboard-content::-webkit-scrollbar-thumb {
-        background: var(--orange-primary);
+        background: var(--christmas-red);
         border-radius: 4px;
     }
 
     .leaderboard-content::-webkit-scrollbar-thumb:hover {
-        background: var(--orange-dark);
+        background: var(--christmas-red-dark);
     }
 
     .leaderboard-list {
@@ -289,7 +289,7 @@
         padding: 12px 16px;
         background: rgba(255, 255, 255, 0.6);
         border-radius: 12px;
-        border: 1px solid var(--orange-light);
+        border: 1px solid var(--christmas-green-light);
         transition: all 0.3s ease;
     }
 
@@ -301,7 +301,7 @@
 
     .leaderboard-item.top-three {
         background: linear-gradient(135deg, rgba(255, 179, 102, 0.2), rgba(255, 212, 166, 0.3));
-        border-color: var(--orange-primary);
+        border-color: var(--christmas-red);
         border-width: 2px;
         font-weight: 600;
     }
@@ -354,17 +354,17 @@
     .score-value {
         font-weight: 700;
         font-size: 1.5rem;
-        color: var(--orange-primary);
+        color: var(--christmas-red);
     }
 
     .top-three .score-value {
         font-size: 1.6rem;
-        color: var(--orange-dark);
+        color: var(--christmas-red-dark);
     }
 
     .score-label {
         font-size: 0.8rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.7;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -373,7 +373,7 @@
     .empty-state {
         text-align: center;
         padding: 40px 20px;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
     }
 
     .empty-state p {

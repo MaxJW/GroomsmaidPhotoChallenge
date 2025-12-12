@@ -15,7 +15,7 @@
     <div class="radial-progress-container">
         <div class="progress-header">
             {#if done}
-                <CheckCircle2 size={16} color="var(--green-success)" />
+                <CheckCircle2 size={16} color="var(--christmas-green)" />
             {/if}
             <span class="progress-label">Progress</span>
         </div>
@@ -23,12 +23,12 @@
             <svg class="radial-progress" viewBox="0 0 100 100">
                 <defs>
                     <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="var(--orange-light)" />
-                        <stop offset="100%" stop-color="var(--orange-primary)" />
+                        <stop offset="0%" stop-color="var(--christmas-red-light)" />
+                        <stop offset="100%" stop-color="var(--christmas-red)" />
                     </linearGradient>
                     <linearGradient id="progressGradientDone" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="var(--green-success)" />
-                        <stop offset="100%" stop-color="#90D490" />
+                        <stop offset="0%" stop-color="var(--christmas-green-light)" />
+                        <stop offset="100%" stop-color="var(--christmas-green)" />
                     </linearGradient>
                 </defs>
                 <!-- Background circle -->
@@ -38,7 +38,7 @@
                     cy="50"
                     r="42"
                     fill="none"
-                    stroke="rgba(255, 179, 102, 0.2)"
+                    stroke="rgba(215, 73, 67, 0.2)"
                     stroke-width="8"
                 />
                 <!-- Progress circle -->
@@ -122,11 +122,11 @@
     .progress-circle {
         transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1),
             stroke 0.3s ease;
-        filter: drop-shadow(0 2px 4px rgba(255, 179, 102, 0.3));
+        filter: drop-shadow(0 2px 4px rgba(215, 73, 67, 0.3));
     }
 
     .progress-circle.done {
-        filter: drop-shadow(0 2px 4px rgba(184, 230, 184, 0.4));
+        filter: drop-shadow(0 2px 4px rgba(39, 156, 128, 0.4));
     }
 
     .progress-numbers {
@@ -141,34 +141,34 @@
 
     .completed-number {
         font-size: 1.7rem;
-        color: var(--orange-primary);
+        color: var(--christmas-red);
         line-height: 1;
     }
 
     .divider {
         font-size: 1.3rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.5;
         line-height: 1;
     }
 
     .total-number {
         font-size: 1.2rem;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         opacity: 0.7;
         line-height: 1;
     }
 
     .done {
-        background: linear-gradient(135deg, rgba(184, 230, 184, 0.95), rgba(191, 255, 191, 0.98)) !important;
+        background: linear-gradient(135deg, rgba(39, 156, 128, 0.15), rgba(39, 156, 128, 0.2)) !important;
     }
 
     .done .progress-bg {
-        stroke: rgba(184, 230, 184, 0.3);
+        stroke: rgba(39, 156, 128, 0.3);
     }
 
     .done .completed-number {
-        color: #4A8A4A;
+        color: var(--christmas-green-dark);
     }
 
     @media (max-width: 480px) {

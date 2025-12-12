@@ -19,7 +19,7 @@ export async function uploadImage(
     const formData = new FormData();
     formData.append('file', compressedFile);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('folder', 'halloween-challenge');
+    formData.append('folder', 'photo-challenge');
     formData.append('public_id', `${challengeId}_${teamName}_${Date.now()}`);
 
     try {

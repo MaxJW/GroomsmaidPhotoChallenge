@@ -1,10 +1,10 @@
 {
-	"name": "Halloween Photo Challenge",
-	"short_name": "Halloween Photo Challenge",
-	"theme_color": "#D38C4E",
-	"background_color": "#D38C4E",
+	"name": "Christmas Photo Challenge",
+	"short_name": "Christmas Photo Challenge",
+	"theme_color": "#C8102E",
+	"background_color": "#0D7A3D",
 	"display": "fullscreen",
 	"orientation": "portrait",
-	"scope": "https://halloween.maxwilson.co.uk/",
-	"start_url": "https://halloween.maxwilson.co.uk/"
+	"scope": "/",
+	"start_url": "/"
 }

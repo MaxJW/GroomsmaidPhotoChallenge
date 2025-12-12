@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { onDestroy } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import Challenges from './components/Challenges.svelte';
     import Gallery from './components/Gallery.svelte';
     import User from './components/User.svelte';
     import { Image, Trophy } from 'lucide-svelte';
     import { SvelteToast } from '@zerodevx/svelte-toast';
     import { db } from './firebase.js';
-    import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+    import { doc, onSnapshot, setDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 
     //Currently set name
     let nameVal = '';
@@ -56,53 +56,74 @@
         }
     });
 
-    //Populate firestore
-    // Note: Challenges should be populated manually in Firestore console
-    // import { db } from './firebase.js';
-    const halloweenList = [
-        'The person with the best costume',
-        'Your team with the person with the best costume',
-        'The person with the scariest costume',
-        'Your team with the scariest costume',
-        'The person with the funniest costume',
-        'Your team with the funniest costume',
-        'A pumpkin',
-        'Your team reenacting a film scene',
-        'Halloween decorations',
-        'Something orange',
-        'A cat',
-        'Sweets',
-        'Your team with one or both of the hosts',
-        'A selfie',
-        'Pretending to trick or treat',
-        'The best makeup',
-        'A photo with someone you didn’t come with',
-        'A hug',
-        'In the lounge',
-        'In the kitchen',
-        'Outside',
-        'Upstairs',
-        'Your team with a pumpkin',
-        'Your team with the venom',
-        'A photo posing as your costume',
-        'Bobbing for apples',
+    // Christmas challenge list
+    const christmasList = [
+        'You and a Christmas tree',
+        'Take a family Christmas card photo with another group',
+        'A Christmas album cover',
+        'A Christmas movie poster',
+        'A scene from a Christmas movie',
+        'With someone whose outfit matches yours',
+        'An argument over Christmas dinner',
+        'The tallest person you can find',
+        'Acting out a nativity scene with another group',
+        'A Pinterest worthy photo',
+        'Reading a Christmas carol',
+        'A scene from the muppets Christmas carol',
+        'Pretending to build a snowman',
         'Playing the piano',
-        'Drinking one of the cocktails',
-        'Eating from the charspookerie',
-        'Your team with a ghost',
-        'Your team with a spooky backdrop',
-        'Another team',
-        'A close up of costume details',
-        'Best nails',
-        'A shadow',
-        'A silhouette',
-        'Tarot cards',
-        'Your team with part of someone else’s costume',
-        'Something spooky',
-        'In a mirror',
-        'Telling a ghost story',
-        'Someone scared',
+        'Singing karaoke',
+        'Under the mistletoe',
+        'As if one of your team cooked all the food',
+        'Tasty food',
+        'Someone stealing some food',
+        'Outside',
+        'Arriving home for Christmas',
+        'With a hallmark movie vibe',
+        'With a penguin',
+        'With Isla',
+        'With Max',
+        'With Max and Isla',
+        'With a cat',
+        'As if it\'s Christmas morning',
+        'Putting a decoration on the tree',
+        'With the muppets Christmas carol poster',
+        'With a present',
+        'Pretending to be carol singing',
+        'A s-elf-ie',
+        'Sitting on Santas lap',
     ];
+
+    // Initialize Firestore collection with Christmas challenges
+    async function initializeChristmasCollection() {
+        try {
+            const christmasCollection = collection(db, 'christmas');
+            const snapshot = await getDocs(christmasCollection);
+            
+            // Only initialize if collection is empty
+            if (snapshot.empty) {
+                console.log('Initializing Christmas collection with challenges...');
+                for (const challengeName of christmasList) {
+                    await addDoc(christmasCollection, {
+                        name: challengeName,
+                        completed: [],
+                        images: []
+                    });
+                }
+                console.log('Christmas collection initialized successfully!');
+            } else {
+                console.log('Christmas collection already exists, skipping initialization.');
+            }
+        } catch (error) {
+            console.error('Error initializing Christmas collection:', error);
+            // Don't break the app if initialization fails
+        }
+    }
+
+    // Run initialization on mount
+    onMount(() => {
+        initializeChristmasCollection();
+    });
 </script>
 
 <User bind:nameVal />
@@ -149,29 +170,29 @@
         align-items: center;
         gap: 8px;
         padding: 10px 16px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 252, 249, 0.98));
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
         backdrop-filter: blur(10px);
-        border: 2px solid var(--dark-purple);
+        border: 2px solid var(--christmas-green);
         border-radius: 12px;
-        color: var(--dark-purple);
+        color: var(--christmas-green-dark);
         font-weight: 500;
         font-size: 0.95rem;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(74, 74, 122, 0.2);
+        box-shadow: 0 4px 12px rgba(39, 156, 128, 0.2);
     }
 
     .toggle-btn:hover {
-        background: linear-gradient(135deg, var(--purple-light), var(--dark-purple));
+        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
         color: var(--white);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(74, 74, 122, 0.3);
+        box-shadow: 0 6px 16px rgba(39, 156, 128, 0.3);
     }
 
     .toggle-btn.active {
-        background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        background: linear-gradient(135deg, var(--christmas-red), var(--christmas-red-dark));
         color: var(--white);
-        border-color: var(--orange-dark);
+        border-color: var(--christmas-red-dark);
     }
 
     @media (max-width: 480px) {
