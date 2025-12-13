@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
+    import { onDestroy } from 'svelte';
     import Challenges from './components/Challenges.svelte';
     import Gallery from './components/Gallery.svelte';
     import User from './components/User.svelte';
     import { Image, Trophy } from 'lucide-svelte';
     import { SvelteToast } from '@zerodevx/svelte-toast';
     import { db } from './firebase.js';
-    import { doc, onSnapshot, setDoc, collection, getDocs, addDoc } from 'firebase/firestore';
+    import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
     //Currently set name
     let nameVal = '';
@@ -54,75 +54,6 @@
         if (unsubscribe) {
             unsubscribe();
         }
-    });
-
-    // Christmas challenge list
-    const christmasList = [
-        'You and a Christmas tree',
-        'Take a family Christmas card photo with another group',
-        'A Christmas album cover',
-        'A Christmas movie poster',
-        'A scene from a Christmas movie',
-        'With someone whose outfit matches yours',
-        'An argument over Christmas dinner',
-        'The tallest person you can find',
-        'Acting out a nativity scene with another group',
-        'A Pinterest worthy photo',
-        'Reading a Christmas carol',
-        'A scene from the muppets Christmas carol',
-        'Pretending to build a snowman',
-        'Playing the piano',
-        'Singing karaoke',
-        'Under the mistletoe',
-        'As if one of your team cooked all the food',
-        'Tasty food',
-        'Someone stealing some food',
-        'Outside',
-        'Arriving home for Christmas',
-        'With a hallmark movie vibe',
-        'With a penguin',
-        'With Isla',
-        'With Max',
-        'With Max and Isla',
-        'With a cat',
-        'As if it\'s Christmas morning',
-        'Putting a decoration on the tree',
-        'With the muppets Christmas carol poster',
-        'With a present',
-        'Pretending to be carol singing',
-        'A s-elf-ie',
-        'Sitting on Santas lap',
-    ];
-
-    // Initialize Firestore collection with Christmas challenges
-    async function initializeChristmasCollection() {
-        try {
-            const christmasCollection = collection(db, 'christmas');
-            const snapshot = await getDocs(christmasCollection);
-            
-            // Only initialize if collection is empty
-            if (snapshot.empty) {
-                console.log('Initializing Christmas collection with challenges...');
-                for (const challengeName of christmasList) {
-                    await addDoc(christmasCollection, {
-                        name: challengeName,
-                        completed: [],
-                        images: []
-                    });
-                }
-                console.log('Christmas collection initialized successfully!');
-            } else {
-                console.log('Christmas collection already exists, skipping initialization.');
-            }
-        } catch (error) {
-            console.error('Error initializing Christmas collection:', error);
-            // Don't break the app if initialization fails
-        }
-    }
-
-    // Run initialization on mount
-    onMount(() => {
-        initializeChristmasCollection();
     });
 </script>
 
