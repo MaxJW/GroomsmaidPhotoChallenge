@@ -1,8 +1,9 @@
 <script lang="ts">
     import { onDestroy } from 'svelte';
+    import { fade } from 'svelte/transition';
     import { db } from '../firebase.js';
     import { collection, onSnapshot } from 'firebase/firestore';
-    import { Image } from 'lucide-svelte';
+    import { Camera } from 'lucide-svelte';
 
     export let name;
 
@@ -12,6 +13,17 @@
         name: string;
         images: Array<{ url: string; teamName: string; timestamp: number }>;
     }> = [];
+
+    // Lightbox state
+    let selectedImage: { url: string; teamName: string } | null = null;
+
+    function openLightbox(image: { url: string; teamName: string }) {
+        selectedImage = image;
+    }
+
+    function closeLightbox() {
+        selectedImage = null;
+    }
 
     const collRef = collection(db, dbName);
     const unsub = onSnapshot(collRef,
@@ -42,31 +54,46 @@
     });
 </script>
 
-<div class="gallery-container">
-    <div class="gallery-header card-back">
+<div class="gallery-wrapper">
+    <!-- Header Card -->
+    <div class="gallery-header">
         <div class="header-content">
-            <Image size={32} color="var(--christmas-green-dark)" />
+            <Camera size={36} color="var(--santa-red)" />
             <h1>Photo Gallery</h1>
         </div>
-        <p class="subtitle">All submitted photos grouped by challenge</p>
+        <p class="header-subtitle">All the festive moments captured! 🎄</p>
     </div>
 
-    <div class="gallery-content">
+    <!-- Gallery Content -->
+    <div class="gallery-grid">
         {#if challenges.length === 0}
-            <div class="empty-state card-back">
-                <p>No photos submitted yet!</p>
-                <p class="subtext">Photos will appear here once teams start completing challenges.</p>
+            <div class="empty-gallery">
+                <div class="empty-icon">📷</div>
+                <h2>No Photos Yet!</h2>
+                <p>Photos will appear here as teams complete challenges.</p>
             </div>
         {:else}
             {#each challenges as challenge (challenge.id)}
-                <div class="challenge-section card-back">
-                    <h2 class="challenge-title">{challenge.name}</h2>
-                    <div class="images-grid">
+                <div class="challenge-gallery">
+                    <div class="challenge-header">
+                        <span class="challenge-icon">🎯</span>
+                        <h2>{challenge.name}</h2>
+                        <span class="photo-count">{challenge.images.length} 📸</span>
+                    </div>
+                    
+                    <div class="photos-grid">
                         {#each challenge.images as image, index (image.timestamp)}
-                            <div class="image-wrapper">
+                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                            <div class="photo-frame" on:click={() => openLightbox(image)}>
+                                <div class="frame-corner top-left"></div>
+                                <div class="frame-corner top-right"></div>
+                                <div class="frame-corner bottom-left"></div>
+                                <div class="frame-corner bottom-right"></div>
+                                
                                 <img src={image.url} alt="Photo by {image.teamName}" loading="lazy" />
-                                <div class="image-overlay">
-                                    <span class="team-name">{image.teamName}</span>
+                                
+                                <div class="photo-caption">
+                                    <span class="team-badge">{image.teamName}</span>
                                 </div>
                             </div>
                         {/each}
@@ -77,8 +104,20 @@
     </div>
 </div>
 
+<!-- Fullscreen Lightbox -->
+{#if selectedImage}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div class="lightbox" transition:fade={{ duration: 200 }} on:click={closeLightbox}>
+        <img src={selectedImage.url} alt="Photo by {selectedImage.teamName}" />
+        <div class="lightbox-caption">
+            <span>{selectedImage.teamName}</span>
+        </div>
+        <p class="lightbox-hint">Tap anywhere to close</p>
+    </div>
+{/if}
+
 <style>
-    .gallery-container {
+    .gallery-wrapper {
         position: fixed;
         top: 0;
         left: 0;
@@ -89,171 +128,413 @@
         z-index: 1;
     }
 
+    /* Header Card */
     .gallery-header {
-        max-width: 1200px;
+        max-width: 800px;
         margin: 0 auto 24px;
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 30%,
+            rgba(255, 255, 255, 0.98) 100%);
+        backdrop-filter: blur(16px);
+        border-radius: 28px;
+        padding: 32px 24px;
         text-align: center;
+        border: 5px solid var(--tree-green);
+        box-shadow: 
+            0 12px 40px rgba(43, 122, 75, 0.2),
+            0 6px 16px rgba(0, 0, 0, 0.1);
+        position: relative;
     }
 
     .header-content {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 12px;
-        margin-bottom: 8px;
+        gap: 14px;
+        margin-top: 12px;
     }
 
     .header-content h1 {
         margin: 0;
-        color: var(--christmas-green-dark);
+        font-size: 2.2rem;
     }
 
-    .subtitle {
-        color: var(--christmas-green-dark);
-        opacity: 0.8;
+    .header-content :global(svg) {
+        filter: drop-shadow(0 2px 4px rgba(199, 58, 56, 0.3));
+    }
+
+    .header-subtitle {
+        color: var(--tree-green-dark);
         font-size: 1.1rem;
-        margin: 0;
+        margin: 12px 0 0 0;
         font-weight: 400;
     }
 
-    .gallery-content {
+    /* Gallery Grid */
+    .gallery-grid {
         max-width: 1200px;
         margin: 0 auto;
         display: flex;
         flex-direction: column;
         gap: 24px;
+        padding-bottom: 40px;
     }
 
-    .empty-state {
+    /* Empty State */
+    .empty-gallery {
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 100%);
+        border-radius: 28px;
+        padding: 60px 32px;
         text-align: center;
-        padding: 60px 20px;
+        border: 5px dashed var(--tree-green);
+        box-shadow: 0 8px 32px rgba(43, 122, 75, 0.15);
     }
 
-    .empty-state p {
-        font-size: 1.4rem;
-        color: var(--christmas-green-dark);
-        margin: 12px 0;
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        animation: float 3s ease-in-out infinite;
     }
 
-    .subtext {
-        font-size: 1rem;
-        opacity: 0.7;
-        font-style: italic;
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
     }
 
-    .challenge-section {
+    .empty-gallery h2 {
+        font-size: 1.8rem;
+        color: var(--santa-red);
+        margin: 0 0 12px 0;
+    }
+
+    .empty-gallery p {
+        font-size: 1.1rem;
+        color: var(--tree-green-dark);
+        margin: 0;
+    }
+
+    /* Challenge Gallery Section */
+    .challenge-gallery {
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 30%,
+            rgba(255, 255, 255, 0.98) 100%);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
         padding: 24px;
+        border: 4px solid var(--tree-green);
+        box-shadow: 
+            0 8px 32px rgba(43, 122, 75, 0.15),
+            0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
-    .challenge-title {
-        font-size: 1.6rem;
-        color: var(--christmas-green-dark);
-        margin: 0 0 20px 0;
-        font-weight: 600;
-        text-align: center;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--christmas-green-light);
+    .challenge-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        border-bottom: 3px dashed var(--tree-green-light);
     }
 
-    .images-grid {
+    .challenge-icon {
+        font-size: 24px;
+    }
+
+    .challenge-header h2 {
+        flex: 1;
+        font-size: 1.5rem;
+        color: var(--tree-green-dark);
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .photo-count {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--santa-red);
+        background: rgba(199, 58, 56, 0.1);
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 2px solid var(--santa-red-light);
+    }
+
+    /* Photos Grid */
+    .photos-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
     }
 
-    .image-wrapper {
+    /* Photo Frame - Polaroid Style */
+    .photo-frame {
         position: relative;
-        width: 100%;
-        aspect-ratio: 3/4;
+        background: var(--snow-white);
         border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(74, 74, 122, 0.15);
-        background: #000;
+        padding: 10px 10px 50px 10px;
+        box-shadow: 
+            0 8px 24px rgba(0, 0, 0, 0.15),
+            0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        transform: rotate(var(--rotation, 0deg));
+        cursor: pointer;
     }
 
-    .image-wrapper img {
+    .photo-frame:nth-child(odd) {
+        --rotation: -2deg;
+    }
+
+    .photo-frame:nth-child(even) {
+        --rotation: 2deg;
+    }
+
+    .photo-frame:nth-child(3n) {
+        --rotation: 1deg;
+    }
+
+    .photo-frame:hover {
+        transform: rotate(0deg) scale(1.05) translateY(-8px);
+        box-shadow: 
+            0 16px 40px rgba(0, 0, 0, 0.2),
+            0 8px 16px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    /* Decorative corners */
+    .frame-corner {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--santa-red);
+        opacity: 0.6;
+    }
+
+    .frame-corner.top-left {
+        top: 4px;
+        left: 4px;
+        border-right: none;
+        border-bottom: none;
+        border-radius: 8px 0 0 0;
+    }
+
+    .frame-corner.top-right {
+        top: 4px;
+        right: 4px;
+        border-left: none;
+        border-bottom: none;
+        border-radius: 0 8px 0 0;
+    }
+
+    .frame-corner.bottom-left {
+        bottom: 44px;
+        left: 4px;
+        border-right: none;
+        border-top: none;
+        border-radius: 0 0 0 8px;
+    }
+
+    .frame-corner.bottom-right {
+        bottom: 44px;
+        right: 4px;
+        border-left: none;
+        border-top: none;
+        border-radius: 0 0 8px 0;
+    }
+
+    .photo-frame img {
         width: 100%;
-        height: 100%;
+        aspect-ratio: 1;
         object-fit: cover;
+        border-radius: 6px;
         display: block;
     }
 
-    .image-overlay {
+    .photo-caption {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4), transparent);
-        padding: 16px 12px 12px;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
     }
 
-    .team-name {
-        color: var(--white);
-        font-weight: 600;
-        font-size: 1rem;
+    .team-badge {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--tree-green-dark);
         text-transform: capitalize;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        display: block;
+        background: linear-gradient(135deg, rgba(43, 122, 75, 0.1), rgba(69, 163, 102, 0.15));
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 2px solid var(--tree-green-light);
     }
 
+    /* Lightbox */
+    .lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        cursor: pointer;
+    }
+
+    .lightbox img {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .lightbox-caption {
+        margin-top: 20px;
+    }
+
+    .lightbox-caption span {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--snow-white);
+        text-transform: capitalize;
+        background: linear-gradient(180deg, var(--tree-green-light) 0%, var(--tree-green) 100%);
+        padding: 8px 20px;
+        border-radius: 30px;
+        border: 3px solid var(--snow-white);
+    }
+
+    .lightbox-hint {
+        position: absolute;
+        bottom: 30px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-        .gallery-container {
+        .gallery-wrapper {
             padding: 12px;
         }
 
         .gallery-header {
-            margin-bottom: 16px;
-            padding: 20px 16px;
+            margin-bottom: 20px;
+            padding: 28px 20px;
+            border-radius: 24px;
+            border-width: 4px;
+        }
+
+        .header-content {
+            gap: 10px;
         }
 
         .header-content h1 {
             font-size: 1.8rem;
         }
 
-        .subtitle {
+        .header-content :global(svg) {
+            width: 28px;
+            height: 28px;
+        }
+
+        .header-subtitle {
             font-size: 1rem;
         }
 
-        .gallery-content {
+        .gallery-grid {
+            gap: 20px;
+        }
+
+        .challenge-gallery {
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .challenge-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .photos-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 16px;
         }
 
-        .challenge-section {
-            padding: 18px;
+        .photo-frame {
+            padding: 8px 8px 44px 8px;
         }
 
-        .challenge-title {
-            font-size: 1.4rem;
-            margin-bottom: 16px;
-        }
-
-        .images-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .team-name {
-            font-size: 0.9rem;
+        .team-badge {
+            font-size: 0.8rem;
+            padding: 3px 10px;
         }
     }
 
     @media (max-width: 480px) {
-        .images-grid {
+        .photos-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 14px;
         }
 
-        .challenge-title {
-            font-size: 1.2rem;
+        .challenge-header {
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
-        .empty-state {
-            padding: 40px 16px;
+        .challenge-header h2 {
+            flex: none;
+            width: 100%;
+            order: 1;
         }
 
-        .empty-state p {
-            font-size: 1.2rem;
+        .challenge-icon {
+            order: 0;
+        }
+
+        .photo-count {
+            order: 0;
+            margin-left: auto;
+        }
+
+        .photo-frame {
+            padding: 6px 6px 40px 6px;
+        }
+
+        .frame-corner {
+            width: 14px;
+            height: 14px;
+            border-width: 2px;
+        }
+
+        .frame-corner.bottom-left,
+        .frame-corner.bottom-right {
+            bottom: 36px;
+        }
+
+        .empty-gallery {
+            padding: 40px 20px;
+            border-radius: 20px;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+        }
+
+        .empty-gallery h2 {
+            font-size: 1.5rem;
+        }
+
+        .empty-decorations span {
+            font-size: 24px;
         }
     }
 </style>
-

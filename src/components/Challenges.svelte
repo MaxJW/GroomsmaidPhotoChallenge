@@ -1,16 +1,18 @@
 <script lang="ts">
     import { onDestroy } from 'svelte';
-    import { fade } from 'svelte/transition';
+    import { fade, scale } from 'svelte/transition';
     import { db } from '../firebase.js';
     import { collection, doc, updateDoc, getDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
     import confetti from 'canvas-confetti';
     import Leaderboard from './Leaderboard.svelte';
     import Total from './Total.svelte';
-    import { RefreshCw, Camera, X, Check, PartyPopper, Loader2 } from 'lucide-svelte';
+    import { Shuffle, Camera, X, Check, PartyPopper, LoaderCircle } from 'lucide-svelte';
     import { uploadImage } from '../cloudinary';
     import { toast } from '@zerodevx/svelte-toast';
 
     export let name;
+
+    $: isAdmin = name.toLowerCase() === 'max_admin';
 
     let dbName = 'christmas';
 
@@ -86,43 +88,35 @@
     }
 
     function triggerConfetti() {
-        const count = 200;
-        const defaults = {
-            origin: { y: 0.7 },
-            colors: ['#FFB366', '#4A4A7A', '#FFD4A6', '#6B6B9E', '#B8E6B8', '#FFB3D1'],
-            shapes: ['square', 'circle'],
-        };
-
-        function fire(particleRatio: number, opts: any) {
-            confetti({
-                ...defaults,
-                ...opts,
-                particleCount: Math.floor(count * particleRatio),
-            });
-        }
-
-        fire(0.25, {
-            spread: 26,
-            startVelocity: 55,
-        });
-        fire(0.2, {
-            spread: 60,
-        });
-        fire(0.35, {
+        const colors = ['#C73A38', '#2B7A4B', '#FFD700', '#FFFFFF', '#E74C4C', '#45A366'];
+        
+        // Christmas confetti burst
+        confetti({
+            particleCount: 150,
             spread: 100,
-            decay: 0.91,
-            scalar: 0.8,
-        });
-        fire(0.1, {
-            spread: 120,
-            startVelocity: 25,
-            decay: 0.92,
+            origin: { y: 0.6 },
+            colors: colors,
+            shapes: ['circle', 'square'],
             scalar: 1.2,
         });
-        fire(0.1, {
-            spread: 120,
-            startVelocity: 45,
-        });
+
+        // Side bursts
+        setTimeout(() => {
+            confetti({
+                particleCount: 80,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.7 },
+                colors: colors,
+            });
+            confetti({
+                particleCount: 80,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.7 },
+                colors: colors,
+            });
+        }, 150);
     }
 
     function openImagePicker() {
@@ -278,50 +272,58 @@
 </script>
 
 <Total total={challengeList.length} completed={completedChallenges} />
-<Leaderboard {challengeList} />
+{#if isAdmin}
+    <Leaderboard {challengeList} />
+{/if}
 
 <div class="container">
-    <div class="heading card-back" class:completed={randomChallenge.completed.includes(name)}>
+    <div class="challenge-wrapper" class:completed={randomChallenge.completed.includes(name)}>
         {#if completedChallenges == challengeList.length}
-            <div class="completion-celebration">
-                <div class="icon-large">
-                    <PartyPopper size={64} color="var(--christmas-red)" />
+            <div class="celebration-card">
+                <div class="trophy-icon">
+                    <PartyPopper size={72} color="var(--gold)" />
                 </div>
-                <h1>All challenges completed!</h1>
-                <h2>Submit your best picture from the game below</h2>
+                <h1>Ho Ho Ho!</h1>
+                <h2>All Challenges Complete!</h2>
+                <p class="celebration-subtitle">You're a Christmas Champion! 🏆</p>
             </div>
         {:else if randomChallenge && randomChallenge.name && randomChallenge.completed}
-            <div class="challenge-block">
-                <h2 class="prompt">Take a photo of...</h2>
-                <div class="challenge-card">
-                    <h1 class="challenge">{randomChallenge.name}</h1>
-                </div>
-                <div class="completers-section">
-                    <h3 class="completers-label">Completed by:</h3>
-                    <div class="completers" class:has-completers={randomChallenge.completed.length > 0}>
-                        {#if randomChallenge.completed.length > 0}
-                            <span class="completer-list">{randomChallenge.completed.join(', ')}</span>
-                        {:else}
-                            <span class="no-completers">Not completed by anyone yet!</span>
-                        {/if}
+            <div class="challenge-card">
+                <div class="challenge-content">
+                    <p class="prompt">Take a photo of...</p>
+                    
+                    <div class="challenge-text-box">
+                        <h1 class="challenge-title">{randomChallenge.name}</h1>
+                    </div>
+                    
+                    <div class="completers-section">
+                        <h3 class="completers-label">🎄 Completed by:</h3>
+                        <div class="completers-box" class:has-completers={randomChallenge.completed.length > 0}>
+                            {#if randomChallenge.completed.length > 0}
+                                <span class="completer-names">{randomChallenge.completed.join(', ')}</span>
+                            {:else}
+                                <span class="no-completers">Be the first to capture this! 🌟</span>
+                            {/if}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="buttons">
-                <button class="action-btn refresh-btn" on:click={selectRandomChallenge} title="New Challenge">
-                    <RefreshCw size={24} />
-                </button>
-                <button class="action-btn camera-btn" on:click={openImagePicker} title="Take Photo">
-                    <Camera size={24} />
-                </button>
-                <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    bind:this={fileInput}
-                    on:change={handleFileSelect}
-                    style="display: none;"
-                />
+                
+                <div class="action-buttons">
+                    <button class="action-btn shuffle-btn" on:click={selectRandomChallenge} title="New Challenge">
+                        <Shuffle size={28} />
+                    </button>
+                    <button class="action-btn camera-btn" on:click={openImagePicker} title="Take Photo">
+                        <Camera size={28} />
+                    </button>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        bind:this={fileInput}
+                        on:change={handleFileSelect}
+                        style="display: none;"
+                    />
+                </div>
             </div>
         {/if}
     </div>
@@ -330,37 +332,45 @@
 <!-- Image Preview Modal -->
 {#if showPreview && capturedImage}
     <div class="preview-overlay" transition:fade={{ duration: 200 }}>
-        <div class="preview-container">
+        <div class="preview-modal" transition:scale={{ duration: 300, start: 0.9 }}>
             <div class="preview-header">
                 {#if isUploading}
-                    <h3>Uploading your photo...</h3>
+                    <h2>Uploading your photo...</h2>
+                    <p>Spreading Christmas cheer! ✨</p>
                 {:else}
-                    <h3>Do you want to use this picture for this challenge?</h3>
+                    <h2>Perfect Shot! 📸</h2>
+                    <p>Use this photo for the challenge?</p>
                 {/if}
             </div>
 
-            <div class="preview-wrapper">
+            <div class="preview-image-container">
                 {#if isUploading}
                     <div class="loading-overlay">
-                        <Loader2 size={48} class="loading-spinner" />
-                        <p>Uploading and saving your challenge...</p>
+                        <LoaderCircle size={56} class="loading-spinner" />
+                        <p>Saving to Santa's gallery...</p>
                     </div>
-                    <img src={capturedImage} alt="Selected photo" class="preview-image" class:loading-blur={isUploading} />
-                {:else}
-                    <img src={capturedImage} alt="Selected photo" class="preview-image" />
                 {/if}
-                <div class="preview-actions">
-                    <button class="action-btn confirm-btn" on:click={confirmAndUpload} disabled={isUploading} title="Confirm">
-                        {#if isUploading}
-                            <Loader2 size={24} class="spinner" />
-                        {:else}
-                            <Check size={24} />
-                        {/if}
-                    </button>
-                    <button class="action-btn cancel-btn" on:click={cancelPreview} disabled={isUploading} title="Cancel">
-                        <X size={24} />
-                    </button>
-                </div>
+                <img 
+                    src={capturedImage} 
+                    alt="Your photo" 
+                    class="preview-image" 
+                    class:blur={isUploading} 
+                />
+            </div>
+            
+            <div class="preview-buttons">
+                <button class="preview-btn cancel-btn" on:click={cancelPreview} disabled={isUploading}>
+                    <X size={24} />
+                    <span>Retake</span>
+                </button>
+                <button class="preview-btn confirm-btn" on:click={confirmAndUpload} disabled={isUploading}>
+                    {#if isUploading}
+                        <LoaderCircle size={24} class="spinner" />
+                    {:else}
+                        <Check size={24} />
+                    {/if}
+                    <span>Submit!</span>
+                </button>
             </div>
         </div>
     </div>
@@ -384,183 +394,222 @@
         box-sizing: border-box;
     }
 
-    .heading {
-        text-align: center;
-        pointer-events: all;
-        max-width: 95%;
-        width: 100%;
+    .challenge-wrapper {
         max-width: 500px;
+        width: 100%;
+    }
+
+    /* Main Challenge Card */
+    .challenge-card {
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 30%,
+            rgba(255, 255, 255, 0.98) 100%);
+        backdrop-filter: blur(16px);
+        border-radius: 28px;
+        padding: 32px 24px;
+        box-shadow: 
+            0 20px 50px rgba(43, 122, 75, 0.2),
+            0 8px 24px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 5px solid var(--tree-green);
         position: relative;
+        text-align: center;
     }
 
-    .heading.completed {
-        background: linear-gradient(135deg, rgba(184, 230, 184, 0.95), rgba(191, 255, 191, 0.98)) !important;
-    }
-
-    .completion-celebration {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        padding: 20px 0;
-    }
-
-    .icon-large {
-        animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-        0%, 100% {
-            transform: translateY(0) scale(1);
-        }
-        50% {
-            transform: translateY(-15px) scale(1.1);
-        }
-    }
-
-    .completion-celebration h1 {
-        color: var(--christmas-red-dark);
-        font-size: 2.2rem;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .completion-celebration h2 {
-        color: var(--christmas-green-dark);
-        font-weight: 400;
-        font-size: 1.3rem;
-        margin: 0;
-    }
-
-    .challenge-block {
-        margin-bottom: 24px;
+    .challenge-content {
+        margin-top: 16px;
     }
 
     .prompt {
-        font-weight: 400;
-        font-size: 1.6rem;
-        color: var(--christmas-green-dark);
-        margin-bottom: 16px;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--tree-green-dark);
+        margin: 0 0 16px 0;
         opacity: 0.9;
     }
 
-    .challenge-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 249, 0.98));
-        backdrop-filter: blur(15px);
-        border-radius: 16px;
-        padding: 24px;
-        margin: 20px 0;
-        box-shadow: 0 8px 24px rgba(74, 74, 122, 0.25),
-            0 2px 8px rgba(74, 74, 122, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        border: 2px solid rgba(255, 255, 255, 0.6);
-        min-height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .challenge-text-box {
+        background: linear-gradient(145deg, 
+            rgba(255, 215, 0, 0.15) 0%, 
+            rgba(255, 248, 240, 0.9) 50%,
+            rgba(255, 215, 0, 0.15) 100%);
+        border: 4px dashed var(--gold);
+        border-radius: 20px;
+        padding: 24px 20px;
+        margin: 16px 0;
+        position: relative;
     }
 
-    .challenge {
+    .challenge-text-box::before,
+    .challenge-text-box::after {
+        content: '⭐';
+        position: absolute;
+        font-size: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .challenge-text-box::before {
+        left: -30px;
+    }
+
+    .challenge-text-box::after {
+        right: -30px;
+    }
+
+    .challenge-title {
+        font-size: 2rem;
         font-weight: 700;
-        font-size: 1.8rem;
-        color: var(--christmas-green-dark);
+        color: var(--santa-red);
         margin: 0;
-        line-height: 1.4;
-        text-align: center;
-        text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8),
-            0 1px 2px rgba(74, 74, 122, 0.2);
-        letter-spacing: 0.5px;
+        line-height: 1.3;
+        text-shadow: 
+            2px 2px 0 var(--snow-white),
+            0 2px 8px rgba(199, 58, 56, 0.2);
     }
 
     .completers-section {
-        margin-top: 20px;
+        margin-top: 24px;
     }
 
     .completers-label {
-        font-weight: 500;
-        font-size: 1.3rem;
-        color: var(--text-dark);
-        margin-bottom: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--tree-green-dark);
+        margin: 0 0 12px 0;
     }
 
-    .completers {
-        background: rgba(255, 255, 255, 0.7);
-        border-radius: 12px;
-        padding: 12px 16px;
-        min-height: 60px;
+    .completers-box {
+        background: rgba(255, 255, 255, 0.8);
+        border: 3px solid var(--tree-green-light);
+        border-radius: 16px;
+        padding: 14px 18px;
+        min-height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--christmas-green-light);
     }
 
-    .completers.has-completers {
-        background: rgba(184, 230, 184, 0.3);
-        border-color: var(--christmas-green);
+    .completers-box.has-completers {
+        background: linear-gradient(135deg, 
+            rgba(43, 122, 75, 0.1) 0%, 
+            rgba(69, 163, 102, 0.15) 100%);
+        border-color: var(--tree-green);
     }
 
-    .completer-list {
+    .completer-names {
         text-transform: capitalize;
-        font-weight: 500;
-        font-size: 1.05rem;
-        color: var(--text-dark);
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--tree-green-dark);
         text-align: center;
         line-height: 1.5;
-        max-height: 120px;
+        max-height: 100px;
         overflow-y: auto;
         word-break: break-word;
     }
 
     .no-completers {
-        color: var(--christmas-green-dark);
-        opacity: 0.7;
+        color: var(--gingerbread-brown);
         font-style: italic;
         font-weight: 400;
+        font-size: 1rem;
     }
 
-    .buttons {
+    /* Action Buttons */
+    .action-buttons {
         display: flex;
-        flex-direction: row;
-        gap: 16px;
+        gap: 20px;
         justify-content: center;
-        align-items: center;
-        margin-top: 24px;
+        margin-top: 28px;
     }
 
     .action-btn {
         border-radius: 50%;
-        aspect-ratio: 1 / 1;
-        min-width: 64px;
-        width: 64px;
-        height: 64px;
+        width: 72px;
+        height: 72px;
+        min-width: 72px;
         padding: 0;
         margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid var(--christmas-red-dark);
+        position: relative;
     }
 
-    .refresh-btn {
-        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
-        color: var(--white);
+    .action-btn::before {
+        display: none;
     }
 
-    .refresh-btn:hover {
-        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-dark));
-        transform: translateY(-2px) rotate(180deg);
+    .shuffle-btn {
+        background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        color: var(--text-dark);
+    }
+
+    .shuffle-btn:hover {
+        background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+        transform: translateY(-4px) rotate(180deg);
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6);
     }
 
     .camera-btn {
-        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-light));
-        color: var(--white);
-        border-color: var(--christmas-green-light);
+        background: linear-gradient(180deg, var(--tree-green-light) 0%, var(--tree-green) 50%, var(--tree-green-dark) 100%);
+        box-shadow: 0 6px 20px rgba(43, 122, 75, 0.4);
     }
 
     .camera-btn:hover {
-        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
+        background: linear-gradient(180deg, var(--tree-green) 0%, var(--tree-green-dark) 100%);
+        box-shadow: 0 10px 30px rgba(43, 122, 75, 0.5);
     }
 
+    /* Celebration Card */
+    .celebration-card {
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 30%,
+            rgba(255, 255, 255, 0.98) 100%);
+        backdrop-filter: blur(16px);
+        border-radius: 28px;
+        padding: 40px 24px;
+        box-shadow: 
+            0 20px 50px rgba(43, 122, 75, 0.2),
+            0 8px 24px rgba(0, 0, 0, 0.1);
+        border: 5px solid var(--tree-green);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .trophy-icon {
+        margin-bottom: 20px;
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-15px) scale(1.05); }
+    }
+
+    .celebration-card h1 {
+        font-size: 2.5rem;
+        margin: 0 0 8px 0;
+    }
+
+    .celebration-card h2 {
+        font-size: 1.6rem;
+        color: var(--tree-green-dark);
+        margin: 0 0 12px 0;
+    }
+
+    .celebration-subtitle {
+        font-size: 1.2rem;
+        color: var(--gingerbread-brown);
+        margin: 0;
+    }
+
+    /* Preview Modal */
     .preview-overlay {
         position: fixed;
         top: 0;
@@ -568,7 +617,7 @@
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(8px);
         z-index: 1000;
         display: flex;
         align-items: center;
@@ -576,52 +625,58 @@
         padding: 16px;
     }
 
-    .preview-container {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 252, 249, 0.98));
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 24px;
-        max-width: 90%;
-        max-height: 90vh;
+    .preview-modal {
+        background: linear-gradient(160deg, 
+            rgba(255, 255, 255, 0.98) 0%, 
+            rgba(255, 248, 240, 0.95) 30%,
+            rgba(255, 255, 255, 0.98) 100%);
+        border-radius: 28px;
+        padding: 32px 24px;
+        max-width: 450px;
         width: 100%;
-        max-width: 500px;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 12px 32px rgba(74, 74, 122, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.5);
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 5px solid var(--tree-green);
+        position: relative;
     }
 
     .preview-header {
         text-align: center;
-        margin-bottom: 20px;
+        margin: 16px 0 24px 0;
     }
 
-    .preview-header h3 {
-        color: var(--christmas-green-dark);
-        font-size: 1.4rem;
-        font-weight: 500;
+    .preview-header h2 {
+        color: var(--santa-red);
+        font-size: 1.8rem;
+        margin: 0 0 8px 0;
+    }
+
+    .preview-header p {
+        color: var(--tree-green-dark);
+        font-size: 1.1rem;
         margin: 0;
     }
 
-
-
-    .preview-wrapper {
+    .preview-image-container {
         position: relative;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 4px solid var(--tree-green);
+        background: #000;
     }
 
     .preview-image {
         width: 100%;
-        border-radius: 16px;
+        max-height: 50vh;
         object-fit: contain;
-        max-height: 60vh;
-        background: #000;
+        display: block;
         transition: filter 0.3s ease;
     }
 
-    .preview-image.loading-blur {
+    .preview-image.blur {
         filter: blur(4px);
         opacity: 0.6;
     }
@@ -636,183 +691,210 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(8px);
-        border-radius: 16px;
-        z-index: 10;
+        background: rgba(255, 255, 255, 0.9);
         gap: 16px;
+        z-index: 10;
     }
 
     .loading-overlay p {
-        color: var(--christmas-green-dark);
+        color: var(--tree-green-dark);
+        font-weight: 700;
         font-size: 1.1rem;
-        font-weight: 500;
-        margin: 0;
-        text-align: center;
     }
 
-    .loading-spinner {
-        color: var(--christmas-green);
+    :global(.loading-spinner) {
+        color: var(--tree-green);
         animation: spin 1s linear infinite;
     }
 
-    .spinner {
+    :global(.spinner) {
         animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
 
-    .preview-actions {
+    .preview-buttons {
         display: flex;
         gap: 16px;
+        margin-top: 24px;
         justify-content: center;
     }
 
+    .preview-btn {
+        flex: 1;
+        max-width: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 20px;
+        border-radius: 50px;
+    }
+
+    .preview-btn::before {
+        display: none;
+    }
+
     .confirm-btn {
-        background: linear-gradient(135deg, var(--christmas-green), var(--christmas-green-light));
-        color: var(--white);
-        border-color: var(--christmas-green-light);
+        background: linear-gradient(180deg, var(--tree-green-light) 0%, var(--tree-green) 50%, var(--tree-green-dark) 100%);
+        box-shadow: 0 6px 20px rgba(43, 122, 75, 0.4);
     }
 
     .confirm-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, var(--christmas-green-light), var(--christmas-green));
+        background: linear-gradient(180deg, var(--tree-green) 0%, var(--tree-green-dark) 100%);
     }
 
     .confirm-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+        opacity: 0.7;
     }
 
     .cancel-btn {
-        background: linear-gradient(135deg, #ff6b6b, #ff5252);
-        color: var(--white);
-        border-color: #ff5252;
+        background: linear-gradient(180deg, #ff6b6b 0%, #ff5252 50%, #e04545 100%);
+        box-shadow: 0 6px 20px rgba(255, 82, 82, 0.3);
     }
 
     .cancel-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #ff5252, #ff6b6b);
+        background: linear-gradient(180deg, #ff5252 0%, #e04545 100%);
     }
 
     .cancel-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
+        opacity: 0.5;
     }
 
-    .action-btn :global(svg) {
-        flex-shrink: 0;
-    }
-
+    /* Mobile Responsive */
     @media (max-width: 480px) {
         .container {
-            padding: 8px;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .heading {
-            max-width: 100%;
-            margin: 0;
-            padding: 20px 16px;
-        }
-
-        .challenge {
-            font-size: 2rem;
-            line-height: 1.3;
-        }
-
-        .prompt {
-            font-size: 1.3rem;
-            margin-bottom: 12px;
+            padding: 10px;
         }
 
         .challenge-card {
-            padding: 18px 16px;
-            margin: 14px 0;
-            min-height: 70px;
+            padding: 28px 18px;
+            border-radius: 24px;
+            border-width: 4px;
         }
 
-        .challenge-block {
-            margin-bottom: 20px;
+        .prompt {
+            font-size: 1.2rem;
+        }
+
+        .challenge-text-box {
+            padding: 20px 16px;
+            margin: 14px 8px;
+            border-width: 3px;
+        }
+
+        .challenge-text-box::before,
+        .challenge-text-box::after {
+            font-size: 16px;
+        }
+
+        .challenge-text-box::before {
+            left: -24px;
+        }
+
+        .challenge-text-box::after {
+            right: -24px;
+        }
+
+        .challenge-title {
+            font-size: 1.7rem;
         }
 
         .completers-section {
-            margin-top: 16px;
+            margin-top: 20px;
         }
 
-        .completers {
-            padding: 10px 14px;
-            min-height: 50px;
-        }
-
-        .completer-list {
+        .completers-label {
             font-size: 1rem;
         }
 
-        .completion-celebration {
-            padding: 16px 0;
-            gap: 12px;
+        .completers-box {
+            padding: 12px 14px;
+            min-height: 45px;
         }
 
-        .completion-celebration h1 {
-            font-size: 1.6rem;
-            padding: 0 8px;
-        }
-
-        .completion-celebration h2 {
-            font-size: 1rem;
-            padding: 0 8px;
-        }
-
-        .icon-large :global(svg) {
-            width: 40px;
-            height: 40px;
+        .action-buttons {
+            gap: 16px;
+            margin-top: 24px;
         }
 
         .action-btn {
-            min-width: 56px;
+            width: 64px;
+            height: 64px;
+            min-width: 64px;
+        }
+
+        .action-btn :global(svg) {
+            width: 24px;
+            height: 24px;
+        }
+
+        .celebration-card {
+            padding: 32px 20px;
+            border-radius: 24px;
+        }
+
+        .celebration-card h1 {
+            font-size: 2rem;
+        }
+
+        .celebration-card h2 {
+            font-size: 1.3rem;
+        }
+
+        .trophy-icon :global(svg) {
             width: 56px;
             height: 56px;
         }
 
-        .action-btn :global(svg) {
-            width: 22px;
-            height: 22px;
+        .preview-modal {
+            padding: 28px 18px;
+            border-radius: 24px;
         }
 
-        .buttons {
-            gap: 14px;
-            margin-top: 18px;
+        .preview-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .preview-buttons {
+            gap: 12px;
+        }
+
+        .preview-btn {
+            padding: 12px 16px;
+            font-size: 14px;
         }
     }
 
-    /* iPhone SE specific (375px and below) */
     @media (max-width: 375px) {
-        .container {
-            padding: 6px;
-        }
-
-        .heading {
-            padding: 16px 14px;
-        }
-
-        .challenge {
-            font-size: 1.8rem;
-        }
-
         .challenge-card {
-            padding: 16px 14px;
-            margin: 12px 0;
+            padding: 24px 14px;
         }
 
-        .buttons {
-            gap: 12px;
+        .challenge-title {
+            font-size: 1.5rem;
+        }
+
+        .challenge-text-box::before,
+        .challenge-text-box::after {
+            display: none;
+        }
+
+        .challenge-text-box {
+            margin: 14px 0;
+        }
+
+        .action-buttons {
+            gap: 14px;
+        }
+
+        .action-btn {
+            width: 58px;
+            height: 58px;
+            min-width: 58px;
         }
     }
 </style>
